@@ -73,7 +73,7 @@ const Navbar = () => {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">首页</Link>
-            <Link to="/" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">归档</Link>
+            <Link to="/archives" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">归档</Link>
             <Link to="/" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">友链</Link>
             <Link to="/" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">关于</Link>
           </div>
@@ -98,7 +98,7 @@ const Navbar = () => {
           >
             <div className="px-4 py-6 space-y-4">
               <Link to="/" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>首页</Link>
-              <Link to="/" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>归档</Link>
+              <Link to="/archives" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>归档</Link>
               <Link to="/" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>友链</Link>
               <Link to="/" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>关于</Link>
             </div>
@@ -417,7 +417,81 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/archives" element={<ArchivesPage />} />
       <Route path="/blog/:slug" element={<ArticleDetail />} />
     </Routes>
   );
 }
+
+// --- Archives Page ---
+
+const ArchivesPage: React.FC = () => {
+  // 按年份分组
+  const grouped = POSTS.reduce<Record<string, Post[]>>((acc, post) => {
+    const year = post.date.split('-')[0];
+    if (!acc[year]) acc[year] = [];
+    acc[year].push(post);
+    return acc;
+  }, {});
+
+  const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          <div className="lg:col-span-8">
+            <header className="mb-12">
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 mb-4"
+              >
+                文章归档
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-lg text-zinc-500"
+              >
+                共 {POSTS.length} 篇文章
+              </motion.p>
+            </header>
+
+            <div className="space-y-12">
+              {years.map(year => (
+                <section key={year}>
+                  <h2 className="text-2xl font-bold text-zinc-900 mb-6 flex items-center">
+                    <span>{year}</span>
+                    <span className="ml-3 text-sm font-normal text-zinc-400">({grouped[year].length} 篇)</span>
+                  </h2>
+                  <ul className="space-y-4">
+                    {grouped[year].map(post => (
+                      <li key={post.id} className="flex items-center group">
+                        <span className="text-sm text-zinc-400 w-20 flex-shrink-0">{post.date.slice(5)}</span>
+                        <Link
+                          to={post.slug ? `/blog/${post.slug}` : '/'}
+                          className="text-lg text-zinc-700 hover:text-zinc-900 transition-colors"
+                        >
+                          {post.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-4 lg:pt-32">
+            <Sidebar />
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+};
