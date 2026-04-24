@@ -160,7 +160,7 @@ const Sidebar = () => {
         <div className="flex justify-center space-x-4 mt-6">
           <a href="https://gitcode.com/seanacode" target="_blank" rel="noopener" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
             <img
-              src="https://cdn-static.gitcode.com/static/images/logo-favicon.png"
+              src="/images/gitcode-icon.png"
               alt="GitCode"
               className="w-5 h-5"
             />
