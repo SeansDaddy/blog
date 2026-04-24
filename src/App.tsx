@@ -158,7 +158,7 @@ const Sidebar = () => {
           <p className="text-sm text-zinc-500 mt-1">记录思考，分享成长</p>
         </div>
         <div className="flex justify-center space-x-4 mt-6">
-          <a href="https://github.com" target="_blank" rel="noopener" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+          <a href="https://gitcode.com/seanacode" target="_blank" rel="noopener" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
             <Github size={20} />
           </a>
         </div>
