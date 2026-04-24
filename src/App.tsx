@@ -1,72 +1,75 @@
 import { useState } from 'react'
-import { Search, Sun, Moon, Rss } from 'lucide-react'
+import { Search, Menu, X } from 'lucide-react'
 
-const allTags = ['React', 'TypeScript', 'Node.js', '前端', '后端', '云原生', '工具', '性能优化', 'JavaScript']
+const allTags = ['PHP', 'Centos', 'MySQL', 'Docker', '架构', 'Nginx', 'Git', 'Shell', 'Java', '面试', '随笔']
 
 const articles = [
   {
     id: 1,
     title: 'React Server Components 深入理解',
     excerpt: '探索 RSC 的核心概念、工作原理以及它如何改变我们构建 React 应用的方式。',
-    cover: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop',
     date: '2026-04-20',
-    readTime: '8 min read',
+    readTime: '8 min',
     tags: ['React', '前端'],
-    featured: true,
+    cover: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop',
   },
   {
     id: 2,
     title: 'TypeScript 5.0 装饰器完全指南',
     excerpt: '深入解析 TypeScript 5.0 中装饰器的语法变化、运行机制以及在实际项目中的最佳实践。',
-    cover: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=400&fit=crop',
     date: '2026-04-18',
-    readTime: '12 min read',
+    readTime: '12 min',
     tags: ['TypeScript', '前端'],
+    cover: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=400&fit=crop',
   },
   {
     id: 3,
     title: 'Node.js 性能优化实战',
     excerpt: '从内存管理、异步IO、集群架构等多个维度，讲解如何打造高性能的 Node.js 应用。',
-    cover: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=400&fit=crop',
     date: '2026-04-15',
-    readTime: '15 min read',
+    readTime: '15 min',
     tags: ['Node.js', '后端'],
+    cover: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=400&fit=crop',
   },
   {
     id: 4,
     title: 'Docker 与 Kubernetes 实践指南',
     excerpt: '容器化时代的必备技能：从 Docker 基础到 K8s 集群管理，一站式掌握云原生部署。',
-    cover: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&h=400&fit=crop',
     date: '2026-04-10',
-    readTime: '10 min read',
-    tags: ['云原生', '工具'],
+    readTime: '10 min',
+    tags: ['Docker', '云原生'],
+    cover: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&h=400&fit=crop',
   },
   {
     id: 5,
     title: '前端性能优化完全指南',
     excerpt: '从 Core Web Vitals 到加载策略，深入探讨现代前端性能优化的核心技巧。',
-    cover: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop',
     date: '2026-04-05',
-    readTime: '20 min read',
-    tags: ['性能优化', '前端'],
+    readTime: '20 min',
+    tags: ['前端', '性能优化'],
+    cover: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop',
   },
   {
     id: 6,
-    title: 'JavaScript 异步编程详解',
-    excerpt: '从 Callback 到 Promise 再到 Async/Await，全面理解 JavaScript 异步编程的演进历程。',
-    cover: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&h=400&fit=crop',
+    title: 'Git 工作流完全指南',
+    excerpt: '深入理解 Git Flow、GitHub Flow 和 Trunk-Based Development，选择适合团队的协作模式。',
     date: '2026-04-01',
-    readTime: '12 min read',
-    tags: ['JavaScript', '前端'],
+    readTime: '10 min',
+    tags: ['Git', '工程化'],
+    cover: 'https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=800&h=400&fit=crop',
   },
 ]
 
+const recentComments = [
+  { user: '张三', text: '写得很好，终于理解了 RSC 的原理！' },
+  { user: '李四', text: '求助：Docker 启动失败是什么问题？' },
+  { user: '王五', text: '感谢分享，已经用上了这个配置' },
+]
+
 function App() {
-  const [darkMode, setDarkMode] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'oldest'>('newest')
-  const [visibleCount, setVisibleCount] = useState(6)
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
@@ -78,140 +81,189 @@ function App() {
     selectedTags.length === 0 || article.tags.some(tag => selectedTags.includes(tag))
   )
 
-  const featuredArticle = filteredArticles.find(a => a.featured) || filteredArticles[0]
-  const regularArticles = filteredArticles.filter(a => a.id !== featuredArticle?.id).slice(0, visibleCount - 1)
-
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900'}`}>
+    <div className="min-h-screen bg-white text-gray-900">
       {/* 导航栏 */}
-      <header className={`border-b ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="/" className="text-xl font-bold">花生牛奶</a>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSearchOpen(!searchOpen)} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <a href="/" className="text-xl font-bold text-gray-900">
+            花生牛奶
+          </a>
+
+          {/* 桌面端菜单 */}
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="/" className="text-sm text-gray-600 hover:text-gray-900">首页</a>
+            <a href="/categories" className="text-sm text-gray-600 hover:text-gray-900">分类</a>
+            <a href="/archives" className="text-sm text-gray-600 hover:text-gray-900">归档</a>
+            <a href="/friends" className="text-sm text-gray-600 hover:text-gray-900">友链</a>
+            <a href="/about" className="text-sm text-gray-600 hover:text-gray-900">关于</a>
+            <a href="/projects" className="text-sm text-gray-600 hover:text-gray-900">开源项目</a>
+            <button onClick={() => setSearchOpen(!searchOpen)} className="p-1 text-gray-500 hover:text-gray-700">
               <Search size={18} />
             </button>
-            <button onClick={() => setDarkMode(!darkMode)} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-          </div>
-        </div>
-      </header>
+          </nav>
 
-      {/* 搜索栏 */}
-      {searchOpen && (
-        <div className={`border-b ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
-          <div className="max-w-5xl mx-auto px-6 py-4">
-            <div className={`flex items-center gap-3 px-4 py-3 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
-              <Search size={18} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
-              <input type="text" placeholder="搜索文章..." className="flex-1 bg-transparent outline-none text-sm" autoFocus />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 主内容 */}
-      <main className="max-w-5xl mx-auto px-6 py-16">
-        {/* Hero */}
-        <div className="mb-12 text-center">
-          <h1 className="text-2xl font-bold mb-2">技术分享与个人思考</h1>
-          <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            探索现代前端技术、后端架构与云原生实践
-          </p>
-          <a href="/" className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
-            <Rss size={14} /> RSS 订阅
-          </a>
+          {/* 移动端菜单按钮 */}
+          <button className="md:hidden p-2 text-gray-600" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
 
-        {/* 筛选和排序 */}
-        <div className={`flex flex-col md:flex-row md:items-start md:justify-between mb-8 pb-6 border-b gap-4 ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className={`text-xs font-medium mr-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>标签:</span>
-            {allTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
-                  selectedTags.includes(tag)
-                    ? 'bg-blue-500 text-white'
-                    : darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-            {selectedTags.length > 0 && (
-              <button onClick={() => setSelectedTags([])} className="text-xs px-3 py-1.5 text-blue-400 hover:text-blue-300">清除</button>
-            )}
+        {/* 移动端菜单 */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4">
+            <nav className="flex flex-col gap-3">
+              <a href="/" className="text-sm text-gray-600">首页</a>
+              <a href="/categories" className="text-sm text-gray-600">分类</a>
+              <a href="/archives" className="text-sm text-gray-600">归档</a>
+              <a href="/friends" className="text-sm text-gray-600">友链</a>
+              <a href="/about" className="text-sm text-gray-600">关于</a>
+              <a href="/projects" className="text-sm text-gray-600">开源项目</a>
+            </nav>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>排序:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className={`text-xs px-2 py-1.5 rounded border ${darkMode ? 'bg-gray-900 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'} focus:outline-none`}
-            >
-              <option value="newest">最新</option>
-              <option value="popular">最热</option>
-              <option value="oldest">最早</option>
-            </select>
-          </div>
-        </div>
-
-        {/* 精选文章 */}
-        {featuredArticle && (
-          <section className="mb-10">
-            <h2 className={`text-xs font-bold uppercase tracking-wider mb-6 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>精选文章</h2>
-            <article className={`rounded-xl overflow-hidden mb-12 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-              <div className="aspect-video w-full overflow-hidden">
-                <img src={featuredArticle.cover} alt={featuredArticle.title} className="w-full h-full object-cover" />
-              </div>
-              <div className="p-6 md:p-8">
-                <div className={`text-xs mb-3 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{featuredArticle.date} · {featuredArticle.readTime}</div>
-                <h3 className="text-xl md:text-2xl font-bold mb-3 hover:text-blue-400 cursor-pointer">{featuredArticle.title}</h3>
-                <p className={`text-sm mb-4 leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{featuredArticle.excerpt}</p>
-                <div className="flex gap-2">
-                  {featuredArticle.tags.map((tag) => (
-                    <span key={tag} className={`text-xs px-2 py-1 rounded ${darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>{tag}</span>
-                  ))}
-                </div>
-              </div>
-            </article>
-          </section>
         )}
 
-        {/* 文章列表 */}
-        <section>
-          <h2 className={`text-xs font-bold uppercase tracking-wider mb-6 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>全部文章</h2>
-          <div className="space-y-8">
-            {regularArticles.map((article) => (
-              <article key={article.id} className={`flex gap-6 pb-8 border-b ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-                <div className="w-32 h-24 md:w-48 md:h-32 rounded-lg overflow-hidden flex-shrink-0">
-                  <img src={article.cover} alt={article.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-                </div>
-                <div className="flex-1 flex flex-col justify-center">
-                  <div className={`text-xs mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{article.date} · {article.readTime}</div>
-                  <h3 className="text-lg font-bold mb-2 hover:text-blue-400 cursor-pointer">{article.title}</h3>
-                  <p className={`text-sm line-clamp-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{article.excerpt}</p>
-                </div>
-              </article>
-            ))}
+        {/* 搜索框 */}
+        {searchOpen && (
+          <div className="border-t border-gray-100 px-4 py-3">
+            <div className="max-w-6xl mx-auto">
+              <input
+                type="text"
+                placeholder="搜索文章..."
+                className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                autoFocus
+              />
+            </div>
           </div>
-          {regularArticles.length === 0 && <div className={`text-center py-12 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>没有找到匹配的文章</div>}
-        </section>
+        )}
+      </header>
+
+      {/* 主内容 */}
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          {/* 左侧文章列表 */}
+          <div className="flex-1">
+            {/* 文章列表 */}
+            <div className="space-y-10">
+              {filteredArticles.map((article) => (
+                <article key={article.id} className="border-b border-gray-100 pb-10">
+                  <img
+                    src={article.cover}
+                    alt={article.title}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
+                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                    <span>{article.date}</span>
+                    <span>·</span>
+                    <span>{article.readTime}</span>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-2 hover:text-gray-600">
+                    <a href={`/blog/${article.id}`}>{article.title}</a>
+                  </h2>
+                  <p className="text-sm text-gray-500 leading-relaxed mb-3">{article.excerpt}</p>
+                  <div className="flex gap-2 mb-3">
+                    {article.tags.map(tag => (
+                      <span key={tag} className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <a href={`/blog/${article.id}`} className="text-sm text-blue-500 hover:text-blue-600">
+                    - 阅读全文 -
+                  </a>
+                </article>
+              ))}
+            </div>
+
+            {filteredArticles.length === 0 && (
+              <div className="text-center py-12 text-gray-400">没有找到匹配的文章</div>
+            )}
+
+            {/* 分页 */}
+            <div className="flex justify-center gap-2 mt-10">
+              <span className="px-3 py-1 text-sm bg-gray-900 text-white rounded">1</span>
+              <a href="/?page=2" className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded">2</a>
+              <a href="/?page=2" className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded">下一页</a>
+            </div>
+          </div>
+
+          {/* 右侧侧边栏 */}
+          <aside className="w-64 flex-shrink-0 space-y-8">
+            {/* 最新文章 */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                最新文章
+              </h3>
+              <ul className="space-y-3">
+                {articles.slice(0, 8).map(article => (
+                  <li key={article.id}>
+                    <a href={`/blog/${article.id}`} className="text-sm text-gray-600 hover:text-gray-900 line-clamp-2">
+                      {article.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 最近回复 */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                最近回复
+              </h3>
+              <ul className="space-y-3">
+                {recentComments.map((comment, idx) => (
+                  <li key={idx} className="text-sm">
+                    <a href="#comment" className="text-blue-500 hover:text-blue-600">{comment.user}</a>
+                    <span className="text-gray-400">: </span>
+                    <span className="text-gray-500 line-clamp-2">{comment.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 标签 */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                标签
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {allTags.map(tag => (
+                  <a
+                    key={tag}
+                    href={`/?tag=${tag}`}
+                    className="text-xs px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded"
+                  >
+                    {tag}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* 其它 */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                其它
+              </h3>
+              <ul className="space-y-2">
+                <li><a href="/rss.xml" className="text-sm text-gray-500 hover:text-gray-700">文章 RSS</a></li>
+                <li><a href="/comments/rss" className="text-sm text-gray-500 hover:text-gray-700">评论 RSS</a></li>
+              </ul>
+            </div>
+          </aside>
+        </div>
       </main>
 
       {/* 底部 */}
-      <footer className={`border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} mt-16`}>
-        <div className="max-w-5xl mx-auto px-6 py-12 text-center">
-          <div className="text-xl font-bold mb-1">花生牛奶</div>
-          <p className={`text-sm mb-6 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>全栈工程师 · 技术分享</p>
-          <div className="flex items-center justify-center gap-6 mb-8">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className={darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'}>GitHub</a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className={darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'}>Twitter</a>
-            <a href="/rss" className={darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'}><Rss size={18} /></a>
+      <footer className="border-t border-gray-200 mt-16">
+        <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+          <div className="text-sm text-gray-400 space-y-2">
+            <p>
+              <a href="/" className="hover:text-gray-600">花生牛奶</a>
+              <span className="mx-2">·</span>
+              <a href="https://typecho.org" target="_blank" rel="noopener" className="hover:text-gray-600">Typecho</a>
+            </p>
+            <p className="text-xs text-gray-400">闽ICP备xxxxxx号</p>
           </div>
-          <div className={`pt-8 border-t text-xs ${darkMode ? 'border-gray-800 text-gray-600' : 'border-gray-200 text-gray-400'}`}>© 2026 花生牛奶</div>
         </div>
       </footer>
     </div>
