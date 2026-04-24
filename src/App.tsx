@@ -17,7 +17,7 @@ interface Post {
   slug: string;
 }
 
-// --- Sample Data ---
+// --- Posts Data ---
 
 const POSTS: Post[] = [
   {
@@ -29,28 +29,28 @@ const POSTS: Post[] = [
     tags: ['AI', 'Agent', 'Python'],
     slug: 'hermes-agent-subagent',
   },
-  {
-    id: '2',
-    title: 'go 库之 patrickmn/go-cache',
-    date: '2023-11-20',
-    excerpt: '在 Go 项目中，经常需要用到缓存。patrickmn/go-cache 是一个在内存中存储键值对的缓存库，类似于 Memcached...',
-    category: 'Backend',
-    tags: ['Go', 'Cache', 'Library'],
-    slug: '',
-  },
-  {
-    id: '3',
-    title: '如何让 Windows 的 Git Bash 可以使用 make',
-    date: '2023-10-15',
-    excerpt: '在 Windows 上进行开发时，有时会用到 make 命令，但 Git Bash 默认不包含它。可以通过安装 MinGW 工具包来解决...',
-    category: 'Tools',
-    tags: ['Windows', 'Git Bash', 'Make'],
-    slug: '',
-  },
 ];
 
+// 动态计算分类和归档
+const getCategoryCounts = () => {
+  const counts: Record<string, number> = {};
+  POSTS.forEach(p => {
+    counts[p.category] = (counts[p.category] || 0) + 1;
+  });
+  return counts;
+};
+
+const getArchiveCounts = () => {
+  const counts: Record<string, number> = {};
+  POSTS.forEach(p => {
+    const year = p.date.split('-')[0];
+    counts[year] = (counts[year] || 0) + 1;
+  });
+  return counts;
+};
+
 const CATEGORIES = ['AI Agent', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
-const ARCHIVES = ['2026 (1)', '2025 (12)', '2024 (24)', '2023 (18)'];
+const ARCHIVES = ['2026', '2025', '2024', '2023'];
 
 // --- Navbar ---
 
@@ -142,58 +142,76 @@ const PostItem: React.FC<{ post: Post }> = ({ post }) => (
 
 // --- Sidebar ---
 
-const Sidebar = () => (
-  <aside className="space-y-10">
-    {/* Profile Card */}
-    <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-      <div className="w-16 h-16 bg-zinc-200 rounded-full mb-4 mx-auto overflow-hidden flex items-center justify-center text-zinc-400">
-        <User size={32} />
-      </div>
-      <div className="text-center">
-        <h3 className="font-bold text-zinc-900">花生牛奶</h3>
-        <p className="text-sm text-zinc-500 mt-1">记录思考，分享成长</p>
-      </div>
-      <div className="flex justify-center space-x-4 mt-6">
-        <a href="https://github.com" target="_blank" rel="noopener" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
-          <Github size={20} />
-        </a>
-      </div>
-    </div>
+const Sidebar = () => {
+  const categoryCounts = getCategoryCounts();
+  const archiveCounts = getArchiveCounts();
 
-    {/* Categories */}
-    <div>
-      <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-widest mb-4 flex items-center">
-        <ChevronRight size={16} className="mr-1 text-zinc-400" />
-        Categories
-      </h3>
-      <ul className="space-y-2">
-        {CATEGORIES.map(cat => (
-          <li key={cat}>
-            <a href="#" className="flex justify-between items-center text-zinc-600 hover:text-zinc-900 py-1 transition-colors group">
-              <span className="text-sm">{cat}</span>
-              <span className="text-[10px] bg-zinc-100 px-2 py-0.5 rounded-full text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-colors">12</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
+  return (
+    <aside className="space-y-10">
+      {/* Profile Card */}
+      <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+        <div className="w-16 h-16 bg-zinc-200 rounded-full mb-4 mx-auto overflow-hidden flex items-center justify-center text-3xl">
+          🥜
+        </div>
+        <div className="text-center">
+          <h3 className="font-bold text-zinc-900">花生牛奶</h3>
+          <p className="text-sm text-zinc-500 mt-1">记录思考，分享成长</p>
+        </div>
+        <div className="flex justify-center space-x-4 mt-6">
+          <a href="https://github.com" target="_blank" rel="noopener" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+            <Github size={20} />
+          </a>
+        </div>
+      </div>
 
-    {/* Archives */}
-    <div>
-      <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-widest mb-4 flex items-center">
-        <Archive size={16} className="mr-2 text-zinc-400" />
-        Archives
-      </h3>
-      <ul className="space-y-2">
-        {ARCHIVES.map(item => (
-          <li key={item}>
-            <a href="#" className="text-sm text-zinc-600 hover:text-zinc-900 block py-1 transition-colors">{item}</a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </aside>
-);
+      {/* Categories */}
+      <div>
+        <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-widest mb-4 flex items-center">
+          <ChevronRight size={16} className="mr-1 text-zinc-400" />
+          Categories
+        </h3>
+        <ul className="space-y-2">
+          {CATEGORIES.map(cat => {
+            const count = categoryCounts[cat] || 0;
+            return (
+              <li key={cat}>
+                <a href="#" className="flex justify-between items-center text-zinc-600 hover:text-zinc-900 py-1 transition-colors group">
+                  <span className="text-sm">{cat}</span>
+                  {count > 0 && (
+                    <span className="text-[10px] bg-zinc-100 px-2 py-0.5 rounded-full text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-colors">{count}</span>
+                  )}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* Archives */}
+      <div>
+        <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-widest mb-4 flex items-center">
+          <Archive size={16} className="mr-2 text-zinc-400" />
+          Archives
+        </h3>
+        <ul className="space-y-2">
+          {ARCHIVES.map(year => {
+            const count = archiveCounts[year] || 0;
+            return (
+              <li key={year}>
+                <a href="#" className="flex justify-between items-center text-sm text-zinc-600 hover:text-zinc-900 block py-1 transition-colors">
+                  <span>{year}</span>
+                  {count > 0 && (
+                    <span className="text-[10px] bg-zinc-100 px-2 py-0.5 rounded-full text-zinc-400">{count}</span>
+                  )}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </aside>
+  );
+};
 
 // --- Footer ---
 
