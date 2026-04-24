@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Menu, X, ChevronRight, Hash, Archive, Clock, Search, ExternalLink, Github, Twitter, Mail } from 'lucide-react';
+import { Menu, X, ChevronRight, Hash, Archive, Clock, Search, ExternalLink, Github, Twitter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // --- Types ---
@@ -77,17 +77,17 @@ const Navbar = () => {
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">L</span>
+              <span className="text-white font-bold text-lg">花</span>
             </div>
-            <span className="text-xl font-semibold tracking-tight text-zinc-900">LukaChen Blog</span>
+            <span className="text-xl font-semibold tracking-tight text-zinc-900">花生牛奶's blog</span>
           </div>
           
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">Home</a>
-            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">Archives</a>
-            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">Projects</a>
-            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">About</a>
+            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">首页</a>
+            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">归档</a>
+            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">友链</a>
+            <a href="#" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">关于</a>
             <button className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
               <Search size={20} />
             </button>
@@ -112,16 +112,16 @@ const Navbar = () => {
             className="md:hidden border-t border-zinc-100 bg-white overflow-hidden"
           >
             <div className="px-4 py-6 space-y-4">
-              <a href="#" className="block text-lg font-medium text-zinc-900">Home</a>
-              <a href="#" className="block text-lg font-medium text-zinc-900">Archives</a>
-              <a href="#" className="block text-lg font-medium text-zinc-900">Projects</a>
-              <a href="#" className="block text-lg font-medium text-zinc-900">About</a>
+              <a href="#" className="block text-lg font-medium text-zinc-900">首页</a>
+              <a href="#" className="block text-lg font-medium text-zinc-900">归档</a>
+              <a href="#" className="block text-lg font-medium text-zinc-900">友链</a>
+              <a href="#" className="block text-lg font-medium text-zinc-900">关于</a>
               <div className="pt-4 border-t border-zinc-100">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
                   <input 
                     type="text" 
-                    placeholder="Search posts..." 
+                    placeholder="搜索文章..." 
                     className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
                   />
                 </div>
@@ -174,13 +174,12 @@ const Sidebar = () => (
         </div>
       </div>
       <div className="text-center">
-        <h3 className="font-bold text-zinc-900">Luka Chen</h3>
-        <p className="text-sm text-zinc-500 mt-1">Full-stack Developer / Linux Enthusiast</p>
+        <h3 className="font-bold text-zinc-900">花生牛奶</h3>
+        <p className="text-sm text-zinc-500 mt-1">兴趣爱好广泛，分享自己的思考</p>
       </div>
       <div className="flex justify-center space-x-4 mt-6">
         <a href="#" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors"><Github size={20} /></a>
         <a href="#" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors"><Twitter size={20} /></a>
-        <a href="#" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors"><Mail size={20} /></a>
       </div>
     </div>
 
@@ -226,22 +225,22 @@ const Footer = () => (
         <div>
           <div className="flex items-center space-x-2 mb-4">
             <div className="w-6 h-6 bg-zinc-900 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-xs">L</span>
+              <span className="text-white font-bold text-xs">花</span>
             </div>
-            <span className="text-lg font-semibold text-zinc-900">LukaChen Blog</span>
+            <span className="text-lg font-semibold text-zinc-900">花生牛奶's blog</span>
           </div>
           <p className="text-sm text-zinc-500 max-w-sm">
-            Sharing thoughts on programming, tools, and life. Built with React and Tailwind CSS.
+            记录思考，分享成长。保持热爱，持续输出。
           </p>
         </div>
         <div className="flex flex-col md:items-end space-y-4">
           <div className="flex space-x-6">
-            <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">About</a>
-            <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">Contact</a>
+            <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">关于</a>
+            <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">友链</a>
             <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">RSS</a>
           </div>
           <p className="text-xs text-zinc-400">
-            © {new Date().getFullYear()} LukaChen. All rights reserved.
+            © {new Date().getFullYear()} 花生牛奶. All rights reserved.
           </p>
         </div>
       </div>
@@ -264,7 +263,7 @@ export default function App() {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-4xl sm:text-5xl font-black tracking-tight text-zinc-900 mb-4"
               >
-                Latest Articles
+                最新文章
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, x: -20 }}
@@ -272,7 +271,7 @@ export default function App() {
                 transition={{ delay: 0.1 }}
                 className="text-lg text-zinc-500"
               >
-                Exploring the boundaries of technology and code quality.
+                记录思考，分享成长
               </motion.p>
             </header>
 
