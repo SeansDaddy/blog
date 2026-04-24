@@ -85,7 +85,7 @@ function App() {
     <div className={`min-h-screen ${darkMode ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900'}`}>
       {/* 导航栏 */}
       <header className={`border-b ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" className="text-xl font-bold">花生牛奶</a>
           <div className="flex items-center gap-3">
             <button onClick={() => setSearchOpen(!searchOpen)} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
@@ -101,7 +101,7 @@ function App() {
       {/* 搜索栏 */}
       {searchOpen && (
         <div className={`border-b ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
-          <div className="max-w-3xl mx-auto px-6 py-4">
+          <div className="max-w-5xl mx-auto px-6 py-4">
             <div className={`flex items-center gap-3 px-4 py-3 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
               <Search size={18} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
               <input type="text" placeholder="搜索文章..." className="flex-1 bg-transparent outline-none text-sm" autoFocus />
@@ -111,7 +111,7 @@ function App() {
       )}
 
       {/* 主内容 */}
-      <main className="max-w-3xl mx-auto px-6 py-16">
+      <main className="max-w-5xl mx-auto px-6 py-16">
         {/* Hero */}
         <div className="mb-12 text-center">
           <h1 className="text-2xl font-bold mb-2">技术分享与个人思考</h1>
@@ -203,7 +203,7 @@ function App() {
 
       {/* 底部 */}
       <footer className={`border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} mt-16`}>
-        <div className="max-w-3xl mx-auto px-6 py-12 text-center">
+        <div className="max-w-5xl mx-auto px-6 py-12 text-center">
           <div className="text-xl font-bold mb-1">花生牛奶</div>
           <p className={`text-sm mb-6 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>全栈工程师 · 技术分享</p>
           <div className="flex items-center justify-center gap-6 mb-8">
