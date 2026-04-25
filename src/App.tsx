@@ -21,13 +21,13 @@ interface Post {
 
 const POSTS: Post[] = [
   {
-    id: '4',
-    title: '智能体 Skill 开发与执行治理规范（v2.0+v2.1 最终版）',
+    id: '3',
+    title: '智能体 Skill 开发与执行治理规范',
     date: '2026-04-25',
-    excerpt: '本文档为 LLM Agent 体系下的 Skill 开发与执行建立了完整的治理标准，涵盖基础质量规范（Schema/Description/ErrorCode/Log/Security）和治理元数据（Policy/AI Trace/PII/Context Builder）。',
+    excerpt: '本文为 LLM Agent 体系下的 Skill 开发与执行建立了一套完整的治理标准，涵盖资源限制、接口契约、日志审计、可用性设计、安全性设计等关键维度。',
     category: '规范标准',
     tags: ['AI Agent', '规范标准', '治理框架'],
-    slug: 'skill-development-governance-v2-final',
+    slug: 'skill-development-governance-v2',
   },
   {
     id: '2',
