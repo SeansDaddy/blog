@@ -30,6 +30,15 @@ const POSTS: Post[] = [
     slug: 'hermes-agent-one-month-review',
   },
   {
+    id: '6',
+    title: '抖音视频内容提取：Whisper 语音识别实战指南',
+    date: '2026-04-25',
+    excerpt: '抖音和视频号均为封闭平台，无官方 API。本文介绍最推荐的合规方案：视频下载 + Whisper 语音识别，可提取任意视频的口播内容，准确率 95%+。',
+    category: 'AI工具',
+    tags: ['AI工具', '音视频', 'Whisper', '内容提取'],
+    slug: 'douyin-video-transcribe-whisper',
+  },
+  {
     id: '3',
     title: '智能体 Skill 开发与执行治理规范',
     date: '2026-04-25',
@@ -76,7 +85,7 @@ const getArchiveCounts = () => {
   return counts;
 };
 
-const CATEGORIES = ['AI Agent', '架构设计', '规范标准', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
+const CATEGORIES = ['AI Agent', '架构设计', '规范标准', 'AI工具', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
 const ARCHIVES = ['2026', '2025', '2024', '2023'];
 
 // --- Navbar ---
