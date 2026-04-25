@@ -21,6 +21,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '5',
+    title: '我把一个 AI Agent 用进了日常工作',
+    date: '2026-04-25',
+    excerpt: '用了快两个月 Hermes Agent 之后的一些真实感受。不是教程，不保证正确，纯粹个人记录。',
+    category: 'Thoughts',
+    tags: ['AI', 'Agent', '随笔'],
+    slug: 'hermes-agent-one-month-review',
+  },
+  {
     id: '3',
     title: '智能体 Skill 开发与执行治理规范',
     date: '2026-04-25',
