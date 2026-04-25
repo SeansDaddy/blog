@@ -22,7 +22,7 @@ interface Post {
 const POSTS: Post[] = [
   {
     id: '3',
-    title: '智能体 Skill 开发与执行治理规范（v2.0）',
+    title: '智能体 Skill 开发与执行治理规范',
     date: '2026-04-25',
     excerpt: '本文为 LLM Agent 体系下的 Skill 开发与执行建立了一套完整的治理标准，涵盖资源限制、接口契约、日志审计、可用性设计、安全性设计等关键维度。',
     category: '规范标准',
