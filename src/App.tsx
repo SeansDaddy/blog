@@ -21,6 +21,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '2',
+    title: 'WSS 长连接与 Webhook 回调：技术对比与选型指南',
+    date: '2026-04-25',
+    excerpt: '在构建与第三方平台对接的系统时，消息推送方式的选择是关键架构决策之一。本文对比 WebSocket 长连接（WSS）和 Webhook 回调两种主流模式，帮你根据实际场景做出合理选择。',
+    category: '架构设计',
+    tags: ['WebSocket', 'Webhook', '系统集成'],
+    slug: 'wss-vs-webhook-comparison',
+  },
+  {
     id: '1',
     title: 'Hermes Agent 子 Agent 架构与 API Key 配置',
     date: '2026-04-22',
@@ -49,7 +58,7 @@ const getArchiveCounts = () => {
   return counts;
 };
 
-const CATEGORIES = ['AI Agent', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
+const CATEGORIES = ['AI Agent', '架构设计', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
 const ARCHIVES = ['2026', '2025', '2024', '2023'];
 
 // --- Navbar ---
@@ -236,7 +245,7 @@ const Footer = () => (
         </div>
         <div className="flex flex-col md:items-end space-y-4">
           <div className="flex space-x-6">
-            <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">关于</a>
+            <a href="/about" className="text-zinc-400 hover:text-zinc-900 transition-colors">关于</a>
             <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">友链</a>
           </div>
           <p className="text-xs text-zinc-400">
@@ -399,7 +408,7 @@ const HomePage: React.FC = () => (
           </header>
 
           <div className="space-y-2">
-            {POSTS.map(post => (
+            {[...POSTS].sort((a, b) => b.date.localeCompare(a.date)).map(post => (
               <PostItem key={post.id} post={post} />
             ))}
           </div>
@@ -423,14 +432,83 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/archives" element={<ArchivesPage />} />
       <Route path="/blog/:slug" element={<ArticleDetail />} />
+      <Route path="/about" element={<AboutPage />} />
     </Routes>
   );
 }
 
+// --- About Page ---
+
+const AboutPage: React.FC = () => (
+  <div className="min-h-screen bg-white">
+    <Navbar />
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
+      <Link
+        to="/"
+        className="inline-flex items-center text-sm text-zinc-400 hover:text-zinc-900 mb-8 transition-colors"
+      >
+        <ArrowLeft size={16} className="mr-1" />
+        返回首页
+      </Link>
+
+      <motion.header
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-8">
+          关于
+        </h1>
+      </motion.header>
+
+      <motion.article
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="prose prose-zinc max-w-none"
+      >
+        <div className="flex flex-col items-center text-center mb-12">
+          <div className="w-24 h-24 bg-zinc-100 rounded-full flex items-center justify-center text-5xl mb-6">
+            🥜
+          </div>
+          <h2 className="text-2xl font-bold text-zinc-900 mb-2">花生牛奶</h2>
+          <p className="text-zinc-500">记录思考，分享成长</p>
+        </div>
+
+        <div className="space-y-6 text-zinc-600 leading-relaxed">
+          <p>
+            这是一个个人技术博客，记录我在 AI Agent、系统架构、工程实践等领域的思考与探索。
+          </p>
+          <p>
+            保持热爱，持续输出。希望这些内容能对你有所帮助。
+          </p>
+
+          <h3 className="text-xl font-bold text-zinc-900 mt-8 mb-4">技术栈</h3>
+          <ul className="list-disc list-inside space-y-1">
+            <li>AI Agent / LLM 应用开发</li>
+            <li>Python / Node.js / TypeScript</li>
+            <li>系统架构与 DevOps</li>
+            <li>自动化工具与工作流</li>
+          </ul>
+
+          <h3 className="text-xl font-bold text-zinc-900 mt-8 mb-4">联系方式</h3>
+          <ul className="space-y-2">
+            <li>
+              <a href="https://gitcode.com/seanacode" target="_blank" rel="noopener" className="text-blue-500 hover:text-blue-600">
+                GitCode：seanacode
+              </a>
+            </li>
+          </ul>
+        </div>
+      </motion.article>
+    </main>
+    <Footer />
+  </div>
+);
+
 // --- Archives Page ---
 
 const ArchivesPage: React.FC = () => {
-  // 按年份分组
+  // 按年份分组（年份内按日期降序）
   const grouped = POSTS.reduce<Record<string, Post[]>>((acc, post) => {
     const year = post.date.split('-')[0];
     if (!acc[year]) acc[year] = [];
@@ -439,6 +517,10 @@ const ArchivesPage: React.FC = () => {
   }, {});
 
   const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
+  // 每年的文章也按日期降序
+  years.forEach(year => {
+    grouped[year].sort((a, b) => b.date.localeCompare(a.date));
+  });
 
   return (
     <div className="min-h-screen bg-white">
