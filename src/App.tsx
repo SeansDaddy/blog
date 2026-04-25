@@ -84,7 +84,7 @@ const Navbar = () => {
             <Link to="/" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">首页</Link>
             <Link to="/archives" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">归档</Link>
             <Link to="/" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">友链</Link>
-            <Link to="/" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">关于</Link>
+            <Link to="/about" className="text-zinc-600 hover:text-zinc-900 text-sm font-medium transition-colors">关于</Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -109,7 +109,7 @@ const Navbar = () => {
               <Link to="/" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>首页</Link>
               <Link to="/archives" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>归档</Link>
               <Link to="/" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>友链</Link>
-              <Link to="/" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>关于</Link>
+              <Link to="/about" className="block text-lg font-medium text-zinc-900" onClick={() => setIsOpen(false)}>关于</Link>
             </div>
           </motion.div>
         )}
@@ -245,7 +245,7 @@ const Footer = () => (
         </div>
         <div className="flex flex-col md:items-end space-y-4">
           <div className="flex space-x-6">
-            <a href="/about" className="text-zinc-400 hover:text-zinc-900 transition-colors">关于</a>
+            <Link to="/about" className="text-zinc-400 hover:text-zinc-900 transition-colors">关于</Link>
             <a href="#" className="text-zinc-400 hover:text-zinc-900 transition-colors">友链</a>
           </div>
           <p className="text-xs text-zinc-400">
