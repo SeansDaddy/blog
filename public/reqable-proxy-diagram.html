@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reqable + Proxifier 强制代理抓包</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f0f0;
+      min-height: 100vh;
+    }
+    .header {
+      background: #1e1e1e;
+      color: #fff;
+      padding: 14px 24px;
+    }
+    .header h1 { font-size: 17px; font-weight: 600; }
+    .header p { font-size: 13px; color: #aaa; margin-top: 2px; }
+
+    .content {
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .canvas-wrap {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px;
+    }
+    canvas { display: block; }
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .step {
+      margin-bottom: 14px;
+    }
+    .step-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: #5c7cfa;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .step-title { font-size: 13px; font-weight: 600; color: #1e1e1e; }
+    .step-desc { font-size: 12px; color: #666; margin-top: 3px; line-height: 1.5; }
+    .note {
+      background: #fff9db;
+      border-left: 3px solid #fab005;
+      padding: 7px 10px;
+      border-radius: 0 5px 5px 0;
+      font-size: 11px;
+      color: #5c4a0a;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      font-size: 12px;
+      color: #444;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 768px) {
+      .content { flex-direction: column; padding: 16px; }
+      .sidebar { width: 100%; }
+      .canvas-wrap { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Reqable + Proxifier 强制代理抓包</h1>
+  <p>让不遵守系统代理的 App 强制走 MITM</p>
+</div>
+
+<div class="content">
+  <div class="canvas-wrap">
+    <canvas id="canvas" width="900" height="820"></canvas>
+  </div>
+
+  <div class="sidebar">
+    <div class="card">
+      <h2>配置步骤</h2>
+
+      <div class="step">
+        <div class="step-num">STEP 1</div>
+        <div class="step-title">确认 Reqable 端口</div>
+        <div class="step-desc">Reqable 顶部显示的端口（默认 9000）。</div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">STEP 2</div>
+        <div class="step-title">Proxifier 添加代理</div>
+        <div class="step-desc">Profile → Proxy Servers → Add，填入 Reqable 地址（127.0.0.1）和端口。</div>
+        <div class="note">不要点 Check，会去请求 google.com，在大陆会失败。直接点 OK。</div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">STEP 3</div>
+        <div class="step-title">设置进程过滤规则</div>
+        <div class="step-desc">Profile → Proxification Rules → Add：<br>
+        Applications：目标可执行文件路径<br>
+        Action：指向 STEP 2 的代理<br>
+        Default 规则：改为 Direct</div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">STEP 4</div>
+        <div class="step-title">首次弹窗确认</div>
+        <div class="step-desc">Proxifier 首次转发流量给 Reqable 时会弹窗询问回路权限。</div>
+        <div class="note">要点"允许"，否则死循环：Proxifier → Reqable → Proxifier → …</div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">STEP 5</div>
+        <div class="step-title">开始抓包</div>
+        <div class="step-desc">Reqable 不需要再配置系统代理。目标 App 流量直接出现在 Reqable 中。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>图例</h2>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffd8a8"></div>移动端 App（抖音 / ClassIn）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d0bfff"></div>Proxifier（系统层拦截）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a5d8ff"></div>Reqable（本地 MITM）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#b2f2bb"></div>目标服务器</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffc9c9"></div>注意事项</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fff3bf"></div>配置步骤</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 手绘风格 Canvas 绘图 ──────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// 手绘线条（模拟手绘的抖动）
+function sketchyLine(x1, y1, x2, y2, roughness = 1) {
+  ctx.beginPath();
+  ctx.moveTo(x1 + (Math.random() - 0.5) * roughness * 2, y1 + (Math.random() - 0.5) * roughness * 2);
+  // 画折线代替直线，模拟手绘感
+  const segments = Math.max(3, Math.hypot(x2 - x1, y2 - y1) / 20);
+  for (let i = 1; i <= segments; i++) {
+    const t = i / segments;
+    const x = x1 + (x2 - x1) * t + (Math.random() - 0.5) * roughness * 1.5;
+    const y = y1 + (y2 - y1) * t + (Math.random() - 0.5) * roughness * 1.5;
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function sketchyRect(x, y, w, h, r, roughness = 2) {
+  ctx.beginPath();
+  const kappa = r * 0.55;
+  const ox = (Math.random() - 0.5) * roughness;
+  const oy = (Math.random() - 0.5) * roughness;
+  ctx.moveTo(x + r + ox, y + oy);
+  ctx.lineTo(x + w - r + ox, y + oy);
+  ctx.quadraticCurveTo(x + w + ox, y + oy, x + w + ox, y + r + oy);
+  ctx.lineTo(x + w + ox, y + h - r + oy);
+  ctx.quadraticCurveTo(x + w + ox, y + h + oy, x + w - r + ox, y + h + oy);
+  ctx.lineTo(x + r + ox, y + h + oy);
+  ctx.quadraticCurveTo(x + ox, y + h + oy, x + ox, y + h - r + oy);
+  ctx.lineTo(x + ox, y + r + oy);
+  ctx.quadraticCurveTo(x + ox, y + oy, x + r + ox, y + oy);
+  ctx.closePath();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawArrow(x1, y1, x2, y2, label) {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const headLen = 12;
+  sketchyLine(x1, y1, x2, y2, 1.5);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - headLen * Math.cos(angle - 0.4), y2 - headLen * Math.sin(angle - 0.4));
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - headLen * Math.cos(angle + 0.4), y2 - headLen * Math.sin(angle + 0.4));
+  ctx.stroke();
+  if (label) {
+    ctx.save();
+    ctx.font = '12px -apple-system, sans-serif';
+    ctx.fillStyle = '#666';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, (x1 + x2) / 2, (y1 + y2) / 2 - 6);
+    ctx.restore();
+  }
+}
+
+function drawLabel(text, fontSize = 13) {
+  ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.fillStyle = '#1e1e1e';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const lines = text.split('\n');
+  const lineH = fontSize * 1.5;
+  const startY = -(lines.length - 1) * lineH / 2;
+  lines.forEach((l, i) => ctx.fillText(l, 0, startY + i * lineH));
+}
+
+// ── 颜色 ────────────────────────────────────────────────────────────────────
+const C = {
+  orange:   '#ffd8a8',
+  purple:   '#d0bfff',
+  blue:     '#a5d8ff',
+  green:    '#b2f2bb',
+  red:      '#ffc9c9',
+  yellow:   '#fff3bf',
+  arrow:    '#555',
+  dark:     '#1e1e1e',
+};
+
+// ── 图节点定义 ────────────────────────────────────────────────────────────────
+const nodes = [
+  {
+    id: 'title', x: 450, y: 38, w: 380, h: 36,
+    fill: 'transparent', text: 'Reqable + Proxifier 强制代理抓包',
+    fontSize: 22, bold: true, shadow: false
+  },
+  {
+    id: 'phone', x: 355, y: 100, w: 190, h: 95,
+    fill: C.orange, text: '移动端 App\n抖音 / ClassIn\n不遵守系统代理',
+    fontSize: 13, lineColors: [C.dark]
+  },
+  {
+    id: 'proxifier', x: 60, y: 270, w: 200, h: 110,
+    fill: C.purple, text: 'Proxifier\n系统层流量拦截\n强制重定向到代理',
+    fontSize: 14, bold: true
+  },
+  {
+    id: 'warning', x: 60, y: 400, w: 200, h: 70,
+    fill: C.red, text: '注意：首次弹窗确认\nProxifier→Reqable 回路\n要点允许，否则死循环',
+    fontSize: 11, textColor: '#c93030'
+  },
+  {
+    id: 'reqable', x: 640, y: 270, w: 200, h: 110,
+    fill: C.blue, text: 'Reqable\n本地 MITM 代理\n端口 9000，解析 HTTPS',
+    fontSize: 14, bold: true
+  },
+  {
+    id: 'server', x: 340, y: 470, w: 220, h: 80,
+    fill: C.green, text: '目标服务器\nAPI 请求的真正目的地',
+    fontSize: 15, bold: true
+  },
+  {
+    id: 'steps', x: 340, y: 580, w: 220, h: 130,
+    fill: C.yellow, text: '配置步骤\n\n① Reqable：端口 9000\n② Proxifier：Add Server\n③ 规则：指定进程走代理\n④ 不要勾 Check',
+    fontSize: 11, textColor: '#333', align: 'left', lineH: 20
+  },
+];
+
+// ── 绘制节点 ─────────────────────────────────────────────────────────────────
+nodes.forEach(n => {
+  if (n.id === 'title') {
+    // 标题文字居中
+    ctx.save();
+    ctx.font = `700 22px -apple-system, sans-serif`;
+    ctx.fillStyle = C.dark;
+    ctx.textAlign = 'center';
+    ctx.fillText(n.text, n.x, n.y);
+    ctx.restore();
+    return;
+  }
+
+  ctx.save();
+  ctx.translate(n.x, n.y);
+
+  // 阴影
+  ctx.shadowColor = 'rgba(0,0,0,0.08)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 3;
+
+  // 填充
+  ctx.fillStyle = n.fill;
+  roundRect(0, 0, n.w, n.h, 12);
+  ctx.fill();
+
+  ctx.shadowColor = 'transparent';
+
+  // 边框
+  ctx.strokeStyle = C.dark;
+  ctx.lineWidth = 1.8;
+  roundRect(0, 0, n.w, n.h, 12);
+  ctx.stroke();
+
+  // 文字
+  ctx.fillStyle = n.textColor || C.dark;
+  ctx.textAlign = n.align || 'center';
+  ctx.textBaseline = 'middle';
+  const lines = n.text.split('\n');
+  const lineH = n.lineH || (n.fontSize * 1.5);
+  const totalH = lines.length * lineH;
+  const startY = -totalH / 2 + lineH / 2;
+  const startX = n.align === 'left' ? -n.w / 2 + 16 : 0;
+  ctx.font = `${n.bold ? '700 ' : '400 '} ${n.fontSize}px -apple-system, sans-serif`;
+  lines.forEach((l, i) => {
+    ctx.fillText(l, startX, startY + i * lineH);
+  });
+
+  ctx.restore();
+});
+
+// ── 箭头 ─────────────────────────────────────────────────────────────────────
+ctx.strokeStyle = C.arrow;
+ctx.lineWidth = 1.8;
+ctx.lineCap = 'round';
+
+// App → Proxifier
+drawArrow(450, 195, 260, 270, '系统层拦截');
+
+// Proxifier → Reqable
+drawArrow(260, 325, 640, 325, '转发到 Reqable MITM');
+
+// Reqable → Server
+drawArrow(740, 380, 560, 470, '解密后转发');
+
+// Server → Reqable (虚线返回)
+ctx.save();
+ctx.setLineDash([5, 4]);
+ctx.strokeStyle = '#999';
+sketchyLine(560, 510, 740, 390, 1);
+ctx.restore();
+ctx.save();
+ctx.font = '11px -apple-system, sans-serif';
+ctx.fillStyle = '#888';
+ctx.textAlign = 'center';
+ctx.fillText('响应原路返回', 680, 448);
+ctx.restore();
+
+// ── 标注线（warning → proxifier）─────────────────────────────────────────────
+ctx.strokeStyle = '#c93030';
+ctx.lineWidth = 1.2;
+ctx.setLineDash([4, 3]);
+sketchyLine(60, 400, 60, 270, 1);
+ctx.setLineDash([]);
+
+// Proxifier → steps
+ctx.strokeStyle = C.arrow;
+ctx.lineWidth = 1.5;
+drawArrow(260, 380, 340, 645);
+</script>
+</body>
+</html>

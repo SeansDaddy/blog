@@ -21,6 +21,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '7',
+    title: 'Hermes Agent 定时任务与会话隔离：一个被很多人忽略的坑',
+    date: '2026-04-26',
+    excerpt: '定时任务（cron）怎么知道今天干了什么？本文揭示了 Hermes cron session 与主会话完全隔离的架构设计，以及为什么「随时记录」是唯一的正确解法。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Hermes', '架构设计', '最佳实践'],
+    slug: 'hermes-cron-session-isolation',
+  },
+  {
     id: '5',
     title: '我把一个 AI Agent 用进了日常工作',
     date: '2026-04-25',
@@ -435,7 +444,7 @@ const HomePage: React.FC = () => (
           </header>
 
           <div className="space-y-2">
-            {[...POSTS].sort((a, b) => b.date.localeCompare(a.date)).map(post => (
+            {[...POSTS].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).map(post => (
               <PostItem key={post.id} post={post} />
             ))}
           </div>
@@ -546,7 +555,7 @@ const ArchivesPage: React.FC = () => {
   const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
   // 每年的文章也按日期降序
   years.forEach(year => {
-    grouped[year].sort((a, b) => b.date.localeCompare(a.date));
+    grouped[year].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
   });
 
   return (
