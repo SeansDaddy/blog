@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '11',
+    title: 'Memory 优化方案 v1.0：从混乱到结构化',
+    date: '2026-04-28',
+    excerpt: 'Memory 混乱、体积膨胀、召回不精准、幻觉问题怎么解？经过一次深度讨论，形成了 Memory 只存"能改变服务行为的信息"的核心原则，以及 @标签 + [情境]→[行为]→[类型] 的双格式规范。记录这次设计过程。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Memory', '架构设计'],
+    slug: 'memory-optimization-v1',
+  },
+  {
     id: '10',
     title: '配色灵感收藏：20 组好看的色彩搭配',
     date: '2026-04-27',
