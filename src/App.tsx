@@ -22,9 +22,9 @@ interface Post {
 const POSTS: Post[] = [
   {
     id: '9',
-    title: '一期视频带你打通 AI 底层逻辑：LLM、Token、Context、Agent 概念串烧',
+    title: '从 Token 到 Agent：AI 底层核心概念串烧',
     date: '2026-04-27',
-    excerpt: '从马克的技术工作坊学到的 AI 核心概念整理——LLM 为什么是文字接龙游戏？Token 为什么不是词？Context 和 Context Window 是什么关系？Agent 和 Agent Skill 有什么区别？一文全部梳理清楚。',
+    excerpt: 'LLM 为什么是文字接龙游戏？Token 为什么不是词？Context 和 Context Window 是什么关系？Agent 和 Agent Skill 有什么区别？一文梳理清楚 AI 圈最核心的 9 个概念。',
     category: 'AI',
     tags: ['AI', 'LLM', 'Agent', '概念解释'],
     slug: 'ai-llm-concepts-deep-dive',
