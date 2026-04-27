@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import { Menu, X, ChevronRight, Hash, Archive, Clock, Search, ExternalLink, ArrowLeft, Calendar, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -409,6 +410,7 @@ const ArticleDetail: React.FC = () => {
         >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
             components={{
               h1: ({children}) => <h1 className="text-3xl font-bold text-zinc-900 mt-10 mb-4">{children}</h1>,
               h2: ({children}) => <h2 className="text-2xl font-bold text-zinc-900 mt-8 mb-3">{children}</h2>,
