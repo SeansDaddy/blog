@@ -21,6 +21,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '8',
+    title: 'Android WebView 应用开发：网页快速变身 App',
+    date: '2026-04-27',
+    excerpt: '用 Android Studio + WebView 组件加载网页，快速构建 Android App。适合已有后端 API 或移动端网页的场景，无需深入学习 Android 原生 UI 开发。',
+    category: 'Tools',
+    tags: ['Android', 'WebView', '移动开发', 'App打包'],
+    slug: 'android-webview-app-development',
+  },
+  {
     id: '7',
     title: 'Hermes Agent 定时任务与会话隔离：一个被很多人忽略的坑',
     date: '2026-04-26',
