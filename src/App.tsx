@@ -21,6 +21,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '10',
+    title: '配色灵感收藏：20 组好看的色彩搭配',
+    date: '2026-04-27',
+    excerpt: '9 组三色配色 + 11 组双色撞色，含色值和适用场景。奶杏暖调、克莱因蓝、爱马仕橙、蒂芙尼蓝……配色其实不需要记太多套路，记住「背景要浅、主色要稳、强调要亮」这个规律就够了。',
+    category: 'Design',
+    tags: ['Design', '配色', '色彩', '视觉设计'],
+    slug: 'color-palette-inspiration',
+  },
+  {
     id: '9',
     title: '从 Token 到 Agent：AI 底层核心概念串烧',
     date: '2026-04-27',
@@ -112,7 +121,7 @@ const getArchiveCounts = () => {
   return counts;
 };
 
-const CATEGORIES = ['AI Agent', '架构设计', '规范标准', 'AI工具', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
+const CATEGORIES = ['Design', 'AI Agent', '架构设计', '规范标准', 'AI工具', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
 const ARCHIVES = ['2026', '2025', '2024', '2023'];
 
 // --- Navbar ---
