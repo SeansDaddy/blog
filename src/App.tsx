@@ -473,7 +473,7 @@ const HomePage: React.FC = () => (
           </header>
 
           <div className="space-y-2">
-            {[...POSTS].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).map(post => (
+            {[...POSTS].sort((a, b) => b.date.localeCompare(a.date) || parseInt(b.id) - parseInt(a.id)).map(post => (
               <PostItem key={post.id} post={post} />
             ))}
           </div>
@@ -584,7 +584,7 @@ const ArchivesPage: React.FC = () => {
   const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
   // 每年的文章也按日期降序
   years.forEach(year => {
-    grouped[year].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    grouped[year].sort((a, b) => b.date.localeCompare(a.date) || parseInt(b.id) - parseInt(a.id));
   });
 
   return (
