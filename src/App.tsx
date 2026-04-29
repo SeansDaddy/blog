@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '13',
+    title: 'HiClaw 架构与 Skill 隔离方案：一次企业级 Agent 编排系统的深度分析',
+    date: '2026-04-29',
+    excerpt: '深入分析 HiClaw 的 Manager-Workers 架构与三层 Skill 隔离机制：容器级隔离、MinIO 共享存储、DockerAPIProxy + SecurityValidator。以及与 Hermes subagent 机制的核心区别对比。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'HiClaw', '架构设计', '安全'],
+    slug: 'hiclaw-skill-isolation-architecture',
+  },
+  {
     id: '12',
     title: 'delegate_task vs tmux：Hermes 子 Agent 两种实现方式',
     date: '2026-04-29',
