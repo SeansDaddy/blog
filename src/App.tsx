@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '12',
+    title: 'delegate_task vs tmux：Hermes 子 Agent 两种实现方式',
+    date: '2026-04-29',
+    excerpt: '深入解析 Hermes Agent 中子 Agent 的两种实现机制：官方推荐的 delegate_task（线程池方案）和来自 skill 的 tmux 变通方案，以及 research-agent 作为实际应用案例。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Hermes', '架构设计'],
+    slug: 'hermes-subagent-delegate-vs-tmux',
+  },
+  {
     id: '11',
     title: 'Hermes 的 Memory 优化',
     date: '2026-04-28',
