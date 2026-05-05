@@ -6,7 +6,7 @@
 
 ---
 
-最近把手头一个静态网站的部署架构梳理了一遍，用的是**阿里云买的域名 + Cloudflare Workers 做前端 + GitHub 管代码**。没有服务器，没有备案，国内访问速度也不错。写篇文章记录一下，供有类似需求的人参考。
+**最近把手头一个静态网站的部署架构梳理了一遍，用的是**阿里云买的域名（已备案）+ Cloudflare Workers 做前端 + GitHub 管代码**。没有服务器，国内访问速度也不错。写篇文章记录一下，供有类似需求的人参考。**
 
 ## 为什么是这套组合
 
@@ -92,13 +92,19 @@ wrangler pages deploy dist --project-name=你的项目名
 
 ## 第四步：绑定自定义域名（可选）
 
-如果你买的是阿里云域名，想要用自己的域名访问，而不是 Cloudflare 给的 `.workers.dev`，可以在 Cloudflare Workers 的「Triggers」里添加自定义域名：
+如果你买的是阿里云域名，想要用自己的域名访问，而不是 Cloudflare 给的 `.workers.dev`，可以在 Cloudflare Workers 的「Domains & Routes」里添加自定义域名：
+
+```
+Workers & Pages → 你的项目 → Settings → Domains & Routes → Add Route
+```
+
+或者在「Custom Domains」Tab 直接添加：
 
 ```
 Workers & Pages → 你的项目 → Triggers → Custom Domains → Add Domain
 ```
 
-输入你的子域名（比如 `blog.yourdomain.com`），Cloudflare 会自动在 DNS 里创建必要的记录，你不需要在阿里云手动配置。Let's Encrypt 证书也是 Cloudflare 自动申请和续期的。
+输入你的子域名（比如 `blog.yourdomain.com`），Cloudflare 会自动在 DNS 里创建必要的记录，你不需要在阿里云手动配置。SSL 证书也是 Cloudflare 自动申请和续期的。
 
 > **注意：** 如果你的域名是主域名（比如 `yourdomain.com`，不是子域名），Cloudflare 可能会要求 DNS 已经托管在 Cloudflare。确认一下阿里云的 NS 变更是否已经生效。
 
