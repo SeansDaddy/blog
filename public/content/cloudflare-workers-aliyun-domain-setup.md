@@ -1,4 +1,4 @@
-# 零成本搭一个「中国可访问」的网站：阿里云域名 + Cloudflare Workers + GitHub
+# 零成本搭一个「国内可访问」的网站：阿里云域名 + Cloudflare Workers + GitHub
 
 **日期：** 2026-05-05
 **分类：** 基础设施
