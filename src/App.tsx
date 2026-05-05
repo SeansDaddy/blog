@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '14',
+    title: '我们是怎么把「写 Skill」这件事流程化的',
+    date: '2026-05-04',
+    excerpt: '从两个真实案例出发，沉淀出一套可复用的 Skill 生成方法论。核心是 SDD 六阶段流程和八个质量维度，每一个阶段都有明确的输入、输出和检查点。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Skill开发', 'SDD', '方法论'],
+    slug: 'sdd-skill-framework-from-practice',
+  },
+  {
     id: '13',
     title: 'HiClaw 架构与 Skill 隔离方案：一次企业级 Agent 编排系统的深度分析',
     date: '2026-04-29',
