@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '15',
+    title: '零成本搭一个「中国可访问」的网站：阿里云域名 + Cloudflare Workers + GitHub',
+    date: '2026-05-05',
+    excerpt: '阿里云域名做 DNS 解析，Cloudflare Workers 托管前端文件，GitHub 管代码 push 即部署。这套组合零服务器、零备案、国内访问速度也不错。顺便记录几个踩过的坑。',
+    category: '基础设施',
+    tags: ['Cloudflare', '域名', 'Workers', '部署'],
+    slug: 'cloudflare-workers-aliyun-domain-setup',
+  },
+  {
     id: '14',
     title: '我们是怎么把「写 Skill」这件事流程化的',
     date: '2026-05-04',
@@ -158,7 +167,7 @@ const getArchiveCounts = () => {
   return counts;
 };
 
-const CATEGORIES = ['Design', 'AI Agent', '架构设计', '规范标准', 'AI工具', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
+const CATEGORIES = ['基础设施', 'Design', 'AI Agent', '架构设计', '规范标准', 'AI工具', 'Backend', 'Frontend', 'Tools', 'DevOps', 'Thoughts'];
 const ARCHIVES = ['2026', '2025', '2024', '2023'];
 
 // --- Navbar ---
