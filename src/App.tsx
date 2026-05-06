@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '16',
+    title: 'Google 官方出品：5 种 Agent Skill 设计模式',
+    date: '2026-05-06',
+    excerpt: 'Format 问题已经解决了，真正的挑战在内容设计。Google 总结了 5 种 SKILL.md 内部工作流的组织方式：Tool Wrapper、Generator、Reviewer、Inversion、Pipeline。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'SKILL.md', '设计模式', 'Google', '方法论'],
+    slug: 'google-agent-skill-design-patterns',
+  },
+  {
     id: '15',
     title: '零成本搭一个「中国可访问」的网站：阿里云域名 + Cloudflare Workers + GitHub',
     date: '2026-05-05',
