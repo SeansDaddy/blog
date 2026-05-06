@@ -32,7 +32,7 @@ const POSTS: Post[] = [
   },
   {
     id: '15',
-    title: '零成本搭一个「中国可访问」的网站：阿里云域名 + Cloudflare Workers + GitHub',
+    title: '零成本搭一个国内可访问的网站：阿里云域名 + Cloudflare Workers + GitHub',
     date: '2026-05-05',
     excerpt: '阿里云域名做 DNS 解析，Cloudflare Workers 托管前端文件，GitHub 管代码 push 即部署。这套组合零服务器、零备案、国内访问速度也不错。顺便记录几个踩过的坑。',
     category: '基础设施',
