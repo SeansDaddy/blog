@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '18',
+    title: 'Skill 好不好，不只看输出：触发精度才是那个被漏掉的维度',
+    date: '2026-05-07',
+    excerpt: '读了两篇 mager.co 的文章，关于 AI Skill 的评估，终于把「触发精度」和「输出质量」这两个维度区分清楚了。记录一下核心收获，以及对我们自己 Skill 开发的借鉴。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Skill开发', 'Evals', 'promptfoo', '方法论'],
+    slug: 'ai-skill-trigger-and-output-quality-evals',
+  },
+  {
     id: '17',
     title: '两个让我后悔的笔记习惯：Mem0 搜索失败和知识库无来源',
     date: '2026-05-07',
