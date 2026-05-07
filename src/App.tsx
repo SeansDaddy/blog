@@ -384,6 +384,17 @@ const Footer = () => (
   </footer>
 );
 
+// --- Strip frontmatter from raw markdown ---
+const stripFrontmatter = (text: string): string => {
+  if (text.startsWith('---')) {
+    const end = text.indexOf('---', 3);
+    if (end !== -1) {
+      return text.slice(end + 3).trimStart();
+    }
+  }
+  return text;
+};
+
 // --- Article Detail Page ---
 
 const ArticleDetail: React.FC = () => {
@@ -400,7 +411,7 @@ const ArticleDetail: React.FC = () => {
       fetch(`/content/${slug}.md`)
         .then(r => r.text())
         .then(text => {
-          setContent(text);
+          setContent(stripFrontmatter(text));
           setLoading(false);
         })
         .catch(() => {
