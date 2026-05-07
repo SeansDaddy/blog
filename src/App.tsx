@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '17',
+    title: '两个让我后悔的笔记习惯：Mem0 搜索失败和知识库无来源',
+    date: '2026-05-07',
+    excerpt: '经验从失败中来，写下来是为了以后不重蹈覆辙。最近有两个笔记使用习惯翻了车，教训很具体。',
+    category: 'Thoughts',
+    tags: ['笔记', 'Mem0', '知识管理', 'AI工具', '方法论'],
+    slug: 'mem0-search-and-knowledge-source',
+  },
+  {
     id: '16',
     title: 'Google 官方出品：5 种 Agent Skill 设计模式',
     date: '2026-05-06',
