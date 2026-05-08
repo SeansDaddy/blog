@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '19',
+    title: '子 Agent 沙箱隔离引发的正确性验证失败：一次源码级别的根因追溯',
+    date: '2026-05-08',
+    excerpt: '用子 agent 做 Skill 的正确性验证失败，根因是 Docker capabilities 过滤而非 seccomp syscall 过滤。直到看源码才确认了这一点。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Hermes', 'Docker', '沙箱', '经验复盘'],
+    slug: 'skill-harness-sandbox-capability-lessons',
+  },
+  {
     id: '18',
     title: 'Skill 好不好，不只看输出：触发精度才是那个被漏掉的维度',
     date: '2026-05-07',
