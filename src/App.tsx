@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
   {
+    id: '20',
+    title: 'Hermes 子 Agent 的 Docker 镜像：从哪里来，是否需要重复安装',
+    date: '2026-05-09',
+    excerpt: '通过源码追溯子 agent 执行环境，澄清 Docker 镜像来源、容器生命周期，以及依赖是否需要重复安装。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Hermes', 'Docker', '沙箱', '源码解读'],
+    slug: 'hermes-subagent-docker-image-lifecycle',
+  },
+  {
     id: '19',
     title: '子 Agent 沙箱隔离引发的正确性验证失败：一次源码级别的根因追溯',
     date: '2026-05-08',
