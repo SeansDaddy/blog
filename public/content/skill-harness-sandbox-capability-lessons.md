@@ -1,5 +1,3 @@
-# 子 Agent 沙箱隔离引发的正确性验证失败：一次源码级别的根因追溯
-
 ## 先说结论
 
 用子 agent 做 Skill 的正确性验证（Output Eval）失败了，根因不是 seccomp syscall 过滤，而是 **Docker 容器的 Linux capabilities 过滤**——Chromium/Playwright 需要的某些 capability 被 `--cap-drop ALL` 丢弃了，导致容器内的 browser_click 无法执行。
