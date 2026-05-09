@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
     {
+    id: '22',
+    title: 'Hermes 的 Skill 机制：从原理到执行',
+    date: '2026-05-09',
+    excerpt: 'Skill 不是插件，不是二进制，不是运行时加载的模块——它是一个被精心组织的 Markdown 文件，通过上下文注入的方式，让 LLM 在需要时"学会"一项技能。理解这一点，才能理解为什么 Skill 的描述质量如此重要。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Hermes', 'Skill', '架构', 'Function Calling'],
+    slug: 'skill-mechanism-deep-dive-2026',
+  },
+  {
     id: '21',
     title: 'Skill 评价这件事：我们到底在评什么',
     date: '2026-05-09',
