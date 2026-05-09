@@ -21,6 +21,15 @@ interface Post {
 // --- Posts Data ---
 
 const POSTS: Post[] = [
+    {
+    id: '21',
+    title: 'Skill 评价这件事：我们到底在评什么',
+    date: '2026-05-09',
+    excerpt: 'Skill 评价有两个完全独立的维度：触发精度和输出质量。混淆它们是 Skill 开发中最常见的错误。SkillsBench 的数据告诉我们，精简的 Skill 效果是庞杂文档的 4 倍，但 16 个任务甚至出现了负向增益——这个数字比任何结论都值得警惕。',
+    category: 'AI Agent',
+    tags: ['AI Agent', 'Skill开发', 'Evals', 'SkillsBench', '方法论'],
+    slug: 'skill-evaluation-deep-dive-2026',
+  },
   {
     id: '20',
     title: 'Hermes 子 Agent 的 Docker 镜像：从哪里来，是否需要重复安装',
