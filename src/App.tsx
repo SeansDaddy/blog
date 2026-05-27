@@ -31,6 +31,15 @@ const POSTS: Post[] = [
     slug: 'openclaw-non-intrusive-integration',
   },
     {
+    id: '33',
+    title: 'OpenClaw vs Hermes Agent 并发机制对比研究',
+    date: '2026-05-27',
+    excerpt: 'Lane 车道机制和 Session Key 锁机制，两条完全不同的多用户并发之路。分析两者的并行模型、锁粒度、队列模式差异与选型建议。',
+    category: '架构设计',
+    tags: ['OpenClaw', 'Hermes Agent', 'AI Agent', '并发', '架构设计'],
+    slug: 'openclaw-vs-hermes-concurrency',
+  },
+    {
     id: '31',
     title: 'AI Agent Hook 机制：从原理到实践',
     date: '2026-05-25',

@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="zh" data-composition-id="openclaw-non-intrusive-integration" data-width="1920" data-height="1080">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw 非侵入式集成：企业多租户 AI 平台的架构思路</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&family=Inter:wght@300;400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0D1B2A;
+      --fg-mid: #1B263B;
+      --neutral: #415A77;
+      --text-sec: #778DA9;
+      --text-pri: #E0E1DD;
+      --accent: #FCA311;
+      --accent-dim: rgba(252, 163, 17, 0.15);
+      --accent-glow: rgba(252, 163, 17, 0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-pri);
+      font-family: 'Inter', 'Noto Serif SC', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ═══ SCENE 1: HOOK ═══ */
+    #s1-bg {
+      position: absolute; inset: 0;
+      background: var(--bg);
+    }
+    #s1-glow-left {
+      position: absolute; left: -200px; top: 50%; transform: translateY(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(65,90,119,0.3) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    #s1-glow-right {
+      position: absolute; right: -200px; top: 50%; transform: translateY(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    #s1-divider {
+      position: absolute;
+      left: 50%; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--neutral) 30%, var(--accent) 50%, var(--neutral) 70%, transparent);
+      opacity: 0.6;
+    }
+    #s1-left-block {
+      position: absolute;
+      left: 60px; top: 50%; transform: translateY(-50%);
+      padding: 48px 52px;
+      background: var(--fg-mid);
+      border: 1px solid var(--neutral);
+      border-left: 4px solid var(--neutral);
+    }
+    #s1-left-label {
+      position: absolute;
+      bottom: 100%; left: 52px;
+      font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text-sec); font-weight: 300;
+    }
+    #s1-left-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 72px; font-weight: 700; line-height: 1.1;
+      color: var(--text-pri);
+    }
+    #s1-left-sub {
+      margin-top: 16px;
+      font-size: 22px; color: var(--text-sec); font-weight: 300;
+      line-height: 1.5;
+    }
+    #s1-right-block {
+      position: absolute;
+      right: 60px; top: 50%; transform: translateY(-50%);
+      padding: 48px 52px;
+      background: rgba(252,163,17,0.08);
+      border: 1px solid rgba(252,163,17,0.3);
+      border-right: 4px solid var(--accent);
+      box-shadow: 0 0 60px rgba(252,163,17,0.1);
+    }
+    #s1-right-label {
+      position: absolute;
+      bottom: 100%; right: 52px;
+      font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); font-weight: 700;
+    }
+    #s1-right-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 72px; font-weight: 700; line-height: 1.1;
+      color: var(--accent);
+      text-shadow: 0 0 40px rgba(252,163,17,0.4);
+    }
+    #s1-right-sub {
+      margin-top: 16px;
+      font-size: 22px; color: var(--text-sec); font-weight: 300;
+      line-height: 1.5;
+    }
+    #s1-center-label {
+      position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      font-size: 28px; font-weight: 700; letter-spacing: 8px;
+      color: var(--accent); text-transform: uppercase;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    #s1-ghost {
+      position: absolute;
+      left: 50%; bottom: 80px; transform: translateX(-50%);
+      font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent); opacity: 0.5;
+    }
+
+    /* ═══ SCENE 2: ARCHITECTURE ═══ */
+    #s2-bg {
+      position: absolute; inset: 0;
+      background: var(--bg);
+    }
+    #s2-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(65,90,119,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(65,90,119,0.08) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    #s2-center-glow {
+      position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: 800px; height: 500px;
+      background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .s2-lane {
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .s2-lane-label {
+      font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
+      font-weight: 700; color: var(--text-sec);
+    }
+    .s2-lane-box {
+      padding: 20px 36px;
+      border: 1px solid var(--neutral);
+      font-size: 18px; font-weight: 400; color: var(--text-pri);
+      text-align: center;
+      min-width: 260px;
+    }
+    .s2-lane-box.accent-box {
+      border-color: rgba(252,163,17,0.4);
+      background: rgba(252,163,17,0.06);
+      color: var(--accent);
+    }
+    .s2-lane-box.main-box {
+      border-color: var(--accent);
+      background: rgba(252,163,17,0.1);
+      box-shadow: 0 0 30px rgba(252,163,17,0.15);
+    }
+    #s2-title {
+      position: absolute;
+      top: 60px; left: 50%; transform: translateX(-50%);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 42px; font-weight: 700;
+      color: var(--text-pri);
+      text-align: center;
+    }
+    #s2-subtitle {
+      position: absolute;
+      top: 120px; left: 50%; transform: translateX(-50%);
+      font-size: 16px; color: var(--text-sec); font-weight: 300;
+      letter-spacing: 2px;
+    }
+    /* Connection lines */
+    .s2-connector {
+      position: absolute;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .s2-arrow-down {
+      width: 2px; height: 40px;
+      background: linear-gradient(to bottom, var(--neutral), var(--accent));
+    }
+    .s2-arrow-head {
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 10px solid var(--accent);
+    }
+    #s2-lanes-wrapper {
+      position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+    }
+    #s2-lane-user { top: 0; }
+    #s2-connector-1 { top: 180px; }
+    #s2-lane-gateway { top: 260px; }
+    #s2-connector-2 { top: 400px; }
+    #s2-lane-openclaw { top: 480px; }
+    #s2-connector-3 { top: 620px; }
+    #s2-lane-dproxy { top: 700px; }
+    #s2-connector-4 { top: 860px; }
+    #s2-lane-legacy { top: 940px; }
+
+    /* ═══ SCENE 3: FIVE PILLARS ═══ */
+    #s3-bg {
+      position: absolute; inset: 0;
+      background: var(--bg);
+    }
+    #s3-title {
+      position: absolute;
+      top: 60px; left: 50%; transform: translateX(-50%);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 52px; font-weight: 700;
+      color: var(--text-pri);
+    }
+    #s3-subtitle {
+      position: absolute;
+      top: 130px; left: 50%; transform: translateX(-50%);
+      font-size: 18px; color: var(--text-sec); font-weight: 300;
+      letter-spacing: 4px;
+    }
+    .s3-pillar {
+      position: absolute;
+      bottom: 160px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      width: 160px;
+    }
+    .s3-pillar-num {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 22px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .s3-pillar-title {
+      font-size: 16px; font-weight: 700;
+      color: var(--text-pri); text-align: center;
+      letter-spacing: 2px;
+    }
+    .s3-pillar-bar {
+      width: 4px;
+      background: linear-gradient(to bottom, var(--accent), rgba(252,163,17,0.2));
+      border-radius: 2px;
+    }
+    #s3-spine {
+      position: absolute;
+      bottom: 260px; height: 4px;
+      background: linear-gradient(to right, var(--accent), rgba(252,163,17,0.3));
+      left: 200px;
+    }
+    #s3-ghost {
+      position: absolute;
+      bottom: 40px; left: 50%; transform: translateX(-50%);
+      font-size: 80px; font-weight: 900;
+      color: rgba(65,90,119,0.06);
+      letter-spacing: 12px; white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ═══ SCENE 4: DEEP DIVE 1 ═══ */
+    #s4-bg {
+      position: absolute; inset: 0;
+      background: var(--bg);
+    }
+    #s4-title {
+      position: absolute;
+      top: 60px; left: 50%; transform: translateX(-50%);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 42px; font-weight: 700;
+      color: var(--text-pri);
+    }
+    #s4-card-left {
+      position: absolute;
+      left: 60px; top: 50%; transform: translateY(-50%);
+      width: 800px;
+      padding: 40px;
+      background: var(--fg-mid);
+      border: 1px solid var(--neutral);
+    }
+    #s4-card-right {
+      position: absolute;
+      right: 60px; top: 50%; transform: translateY(-50%);
+      width: 800px;
+      padding: 40px;
+      background: var(--fg-mid);
+      border: 1px solid var(--neutral);
+    }
+    .s4-card-title {
+      font-size: 20px; font-weight: 700;
+      color: var(--accent); margin-bottom: 24px;
+      letter-spacing: 3px; text-transform: uppercase;
+    }
+    .s4-flow-row {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 20px;
+    }
+    .s4-flow-node {
+      padding: 10px 18px;
+      background: rgba(252,163,17,0.1);
+      border: 1px solid rgba(252,163,17,0.3);
+      font-size: 15px; color: var(--text-pri);
+      white-space: nowrap;
+    }
+    .s4-flow-arrow {
+      color: var(--accent); font-size: 20px;
+    }
+    .s4-desc {
+      font-size: 15px; color: var(--text-sec); line-height: 1.7;
+      margin-top: 12px;
+    }
+    .s4-iso-layers {
+      display: flex; flex-direction: column; gap: 12px;
+      margin-top: 20px;
+    }
+    .s4-iso-layer {
+      padding: 14px 20px;
+      border-left: 3px solid;
+      font-size: 15px; color: var(--text-pri);
+    }
+    .s4-iso-layer:nth-child(1) { border-color: var(--accent); background: rgba(252,163,17,0.06); }
+    .s4-iso-layer:nth-child(2) { border-color: var(--neutral); background: rgba(65,90,119,0.1); }
+
+    /* ═══ SCENE 5: DEEP DIVE 2 ═══ */
+    #s5-bg {
+      position: absolute; inset: 0;
+      background: var(--bg);
+    }
+    #s5-title {
+      position: absolute;
+      top: 60px; left: 50%; transform: translateX(-50%);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 42px; font-weight: 700;
+      color: var(--text-pri);
+    }
+    #s5-left-panel {
+      position: absolute;
+      left: 60px; top: 50%; transform: translateY(-50%);
+      width: 800px; padding: 40px;
+      background: var(--fg-mid);
+      border: 1px solid var(--neutral);
+    }
+    #s5-right-panel {
+      position: absolute;
+      right: 60px; top: 50%; transform: translateY(-50%);
+      width: 800px; padding: 40px;
+      background: var(--fg-mid);
+      border: 1px solid var(--neutral);
+    }
+    .s5-panel-title {
+      font-size: 20px; font-weight: 700;
+      color: var(--accent); margin-bottom: 24px;
+      letter-spacing: 3px; text-transform: uppercase;
+    }
+    .s5-ring {
+      display: flex; align-items: center; gap: 20px;
+      margin-bottom: 16px;
+    }
+    .s5-ring-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+    .s5-ring-l1 { border: 3px solid var(--accent); color: var(--accent); }
+    .s5-ring-l2 { border: 3px solid var(--neutral); color: var(--text-sec); width: 64px; height: 64px; font-size: 12px; }
+    .s5-ring-l3 { border: 3px solid rgba(65,90,119,0.5); color: var(--text-sec); width: 48px; height: 48px; font-size: 11px; }
+    .s5-ring-label { font-size: 16px; color: var(--text-pri); }
+    .s5-ring-desc { font-size: 13px; color: var(--text-sec); margin-top: 4px; }
+    .s5-select-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border: 2px solid var(--accent);
+      color: var(--accent); font-size: 16px; font-weight: 700;
+      letter-spacing: 4px;
+    }
+
+    /* ═══ SCENE 6: CLOSING ═══ */
+    #s6-bg {
+      position: absolute; inset: 0;
+      background: var(--bg);
+    }
+    #s6-bottom-glow {
+      position: absolute;
+      bottom: -200px; left: 50%; transform: translateX(-50%);
+      width: 1000px; height: 600px;
+      background: radial-gradient(ellipse, rgba(252,163,17,0.2) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    #s6-statement {
+      position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 96px; font-weight: 900;
+      color: var(--text-pri);
+      text-align: center;
+      letter-spacing: 8px;
+    }
+    #s6-sub {
+      position: absolute;
+      left: 50%; top: calc(50% + 100px); transform: translateX(-50%);
+      font-size: 20px; color: var(--accent); font-weight: 300;
+      letter-spacing: 8px;
+      display: flex; gap: 32px;
+    }
+    #s6-pillars-row {
+      position: absolute;
+      bottom: 120px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 20px;
+    }
+    .s6-pillar-tag {
+      padding: 8px 20px;
+      border: 1px solid var(--neutral);
+      font-size: 13px; color: var(--text-sec); font-weight: 400;
+      letter-spacing: 2px;
+    }
+    #s6-source {
+      position: absolute;
+      bottom: 60px; left: 50%; transform: translateX(-50%);
+      font-size: 13px; color: rgba(119,141,169,0.4); font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    /* Helper */
+    .clip {
+      position: absolute; inset: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ SCENE 1: HOOK ═══════════════════ -->
+<div class="clip" id="s1"
+  data-composition-id="s1"
+  data-start="0"
+  data-duration="6"
+  data-track-index="0">
+  <div id="s1-bg">
+    <div id="s1-glow-left"></div>
+    <div id="s1-glow-right"></div>
+    <div id="s1-divider"></div>
+
+    <div id="s1-left-block">
+      <div id="s1-left-label">Legacy System</div>
+      <div id="s1-left-title">原系统<br>零改动</div>
+      <div id="s1-left-sub">稳定压一切<br>不能动核心代码</div>
+    </div>
+
+    <div id="s1-right-block">
+      <div id="s1-right-label">AI Capability</div>
+      <div id="s1-right-title">AI 能力<br>零侵入</div>
+      <div id="s1-right-sub">快速上线<br>不改变现有架构</div>
+    </div>
+
+    <div id="s1-center-label">外挂式集成</div>
+    <div id="s1-ghost">NON-INTRUSIVE INTEGRATION</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCENE 2: ARCHITECTURE ═══════════════════ -->
+<div class="clip" id="s2"
+  data-composition-id="s2"
+  data-start="6"
+  data-duration="8"
+  data-track-index="0">
+  <div id="s2-bg">
+    <div id="s2-grid"></div>
+    <div id="s2-center-glow"></div>
+    <div id="s2-title">整体架构</div>
+    <div id="s2-subtitle">数据流穿过三层，原系统零感知</div>
+
+    <div id="s2-lanes-wrapper">
+      <div class="s2-lane" id="s2-lane-user" style="position:relative; top:0;">
+        <div class="s2-lane-label">用户端</div>
+        <div class="s2-lane-box">浏览器 · Session Cookie</div>
+      </div>
+      <div class="s2-connector" id="s2-connector-1" style="position:relative; top:0;">
+        <div class="s2-arrow-down"></div>
+        <div class="s2-arrow-head"></div>
+      </div>
+      <div class="s2-lane" id="s2-lane-gateway" style="position:relative; top:0;">
+        <div class="s2-lane-label">Gateway 层</div>
+        <div class="s2-lane-box accent-box">Cookie 解析器 · Token 签发 · 路由</div>
+      </div>
+      <div class="s2-connector" id="s2-connector-2" style="position:relative; top:0;">
+        <div class="s2-arrow-down"></div>
+        <div class="s2-arrow-head"></div>
+      </div>
+      <div class="s2-lane" id="s2-lane-openclaw" style="position:relative; top:0;">
+        <div class="s2-lane-label">OpenClaw 运行时</div>
+        <div class="s2-lane-box main-box">多租户 Agent Pool · Skill 执行器</div>
+      </div>
+      <div class="s2-connector" id="s2-connector-3" style="position:relative; top:0;">
+        <div class="s2-arrow-down"></div>
+        <div class="s2-arrow-head"></div>
+      </div>
+      <div class="s2-lane" id="s2-lane-dproxy" style="position:relative; top:0;">
+        <div class="s2-lane-label">DataProxy</div>
+        <div class="s2-lane-box accent-box">HTTP / SQL 双向协议转换</div>
+      </div>
+      <div class="s2-connector" id="s2-connector-4" style="position:relative; top:0;">
+        <div class="s2-arrow-down"></div>
+        <div class="s2-arrow-head"></div>
+      </div>
+      <div class="s2-lane" id="s2-lane-legacy" style="position:relative; top:0;">
+        <div class="s2-lane-label">原系统</div>
+        <div class="s2-lane-box">API + 数据湖 · 零感知</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCENE 3: FIVE PILLARS ═══════════════════ -->
+<div class="clip" id="s3"
+  data-composition-id="s3"
+  data-start="14"
+  data-duration="7"
+  data-track-index="0">
+  <div id="s3-bg">
+    <div id="s3-title">五个关键设计点</div>
+    <div id="s3-subtitle">FIVE KEY DESIGN POINTS</div>
+    <div id="s3-spine"></div>
+
+    <div class="s3-pillar" id="s3-p1" style="left: calc(50% - 880px);">
+      <div class="s3-pillar-bar" style="height: 80px;"></div>
+      <div class="s3-pillar-num">1</div>
+      <div class="s3-pillar-title">认证透传</div>
+    </div>
+
+    <div class="s3-pillar" id="s3-p2" style="left: calc(50% - 660px);">
+      <div class="s3-pillar-bar" style="height: 120px;"></div>
+      <div class="s3-pillar-num">2</div>
+      <div class="s3-pillar-title">多租隔离</div>
+    </div>
+
+    <div class="s3-pillar" id="s3-p3" style="left: calc(50% - 440px);">
+      <div class="s3-pillar-bar" style="height: 160px;"></div>
+      <div class="s3-pillar-num">3</div>
+      <div class="s3-pillar-title">能力边界</div>
+    </div>
+
+    <div class="s3-pillar" id="s3-p4" style="left: calc(50% - 220px);">
+      <div class="s3-pillar-bar" style="height: 120px;"></div>
+      <div class="s3-pillar-num">4</div>
+      <div class="s3-pillar-title">三层流控</div>
+    </div>
+
+    <div class="s3-pillar" id="s3-p5" style="left: calc(50% + 20px);">
+      <div class="s3-pillar-bar" style="height: 80px;"></div>
+      <div class="s3-pillar-num">5</div>
+      <div class="s3-pillar-title">定时任务<br>IAM 委托</div>
+    </div>
+
+    <div id="s3-ghost">NON-INTRUSIVE</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCENE 4: DEEP DIVE 1 ═══════════════════ -->
+<div class="clip" id="s4"
+  data-composition-id="s4"
+  data-start="21"
+  data-duration="7"
+  data-track-index="0">
+  <div id="s4-bg">
+    <div id="s4-title">认证透传 · 多租隔离</div>
+
+    <div id="s4-card-left">
+      <div class="s4-card-title">① 认证透传</div>
+      <div class="s4-flow-row">
+        <div class="s4-flow-node">Session Cookie</div>
+        <div class="s4-flow-arrow">→</div>
+        <div class="s4-flow-node">Gateway 解析</div>
+        <div class="s4-flow-arrow">→</div>
+        <div class="s4-flow-node">Token 签发</div>
+      </div>
+      <div class="s4-flow-row">
+        <div class="s4-flow-node">Redis 映射</div>
+        <div class="s4-flow-arrow">→</div>
+        <div class="s4-flow-node">换回 Cookie</div>
+        <div class="s4-flow-arrow">→</div>
+        <div class="s4-flow-node">原系统调用</div>
+      </div>
+      <div class="s4-desc">
+        原系统零改动，AI 平台复用已有 Session + Cookie 体系。<br>
+        对原系统来说，请求看起来来自正常浏览器。
+      </div>
+    </div>
+
+    <div id="s4-card-right">
+      <div class="s4-card-title">② 多租隔离</div>
+      <div class="s4-iso-layers">
+        <div class="s4-iso-layer">
+          <strong style="color:var(--accent)">企业级隔离</strong><br>
+          <span style="color:var(--text-sec)">Gateway 根据 tenant_id 路由到对应企业 Agent 实例，不同企业数据完全隔离</span>
+        </div>
+        <div class="s4-iso-layer">
+          <strong style="color:var(--accent)">用户级隔离</strong><br>
+          <span style="color:var(--text-sec)">同企业内通过 OpenClaw dmScope: per-channel-peer 实现用户会话隔离</span>
+        </div>
+        <div class="s4-iso-layer">
+          <strong style="color:var(--accent)">动态路由</strong><br>
+          <span style="color:var(--text-sec)">新增用户无需管理员介入配置，Gateway 自动识别并路由</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCENE 5: DEEP DIVE 2 ═══════════════════ -->
+<div class="clip" id="s5"
+  data-composition-id="s5"
+  data-start="28"
+  data-duration="7"
+  data-track-index="0">
+  <div id="s5-bg">
+    <div id="s5-title">能力边界 · 三层流控</div>
+
+    <div id="s5-left-panel">
+      <div class="s5-panel-title">③ 能力边界</div>
+      <div style="margin-bottom: 20px;">
+        <div class="s5-select-badge">SELECT ONLY</div>
+      </div>
+      <div class="s4-desc" style="font-size:16px; line-height:1.8;">
+        AI 平台定位为<strong style="color:var(--text-pri)">纯读 + 建议</strong>系统：<br><br>
+        · 所有 API 调用均为 <strong style="color:var(--accent)">SELECT 查询</strong>，不执行任何写操作<br>
+        · 诊断结论展示给用户，不直接生成工单<br>
+        · 不下发控制指令<br>
+        · DataProxy 层做数据过滤，防止越权数据返回
+      </div>
+    </div>
+
+    <div id="s5-right-panel">
+      <div class="s5-panel-title">④ 三层并发控制</div>
+      <div class="s5-ring">
+        <div class="s5-ring-circle s5-ring-l1">L1</div>
+        <div>
+          <div class="s5-ring-label">Redis 令牌桶</div>
+          <div class="s5-ring-desc">业务层限速，防用户级别突发</div>
+        </div>
+      </div>
+      <div class="s5-ring">
+        <div class="s5-ring-circle s5-ring-l2">L2</div>
+        <div>
+          <div class="s5-ring-label">Gateway rateLimit</div>
+          <div class="s5-ring-desc">网关层流控，平台注入配置</div>
+        </div>
+      </div>
+      <div class="s5-ring">
+        <div class="s5-ring-circle s5-ring-l3">L3</div>
+        <div>
+          <div class="s5-ring-label">OpenClaw 沙箱配额</div>
+          <div class="s5-ring-desc">执行层资源隔离</div>
+        </div>
+      </div>
+      <div class="s4-desc" style="margin-top:16px; font-size:14px; color:var(--accent);">
+        三层各司其职，任一层失效不会导致整体失效。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCENE 6: CLOSING ═══════════════════ -->
+<div class="clip" id="s6"
+  data-composition-id="s6"
+  data-start="35"
+  data-duration="6"
+  data-track-index="0">
+  <div id="s6-bg">
+    <div id="s6-bottom-glow"></div>
+    <div id="s6-statement">复用而非替代</div>
+    <div id="s6-sub">
+      <span>零侵入</span><span>·</span><span>企业级</span><span>·</span><span>可进化</span>
+    </div>
+    <div id="s6-pillars-row">
+      <div class="s6-pillar-tag">认证透传</div>
+      <div class="s6-pillar-tag">多租隔离</div>
+      <div class="s6-pillar-tag">能力边界</div>
+      <div class="s6-pillar-tag">三层流控</div>
+      <div class="s6-pillar-tag">IAM 委托</div>
+    </div>
+    <div id="s6-source">tech.seanshi.cn · OpenClaw 非侵入式集成</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script>
+window.__timelines = window.__timelines || {};
+
+// ─── SCENE 1 ───
+(function() {
+  const tl = gsap.timeline({ paused: true });
+
+  // Left block: cascade from top
+  tl.from('#s1-left-block', { y: -120, opacity: 0, duration: 0.7, ease: 'power3.in' }, 0.2);
+  // Right block: slide from right with glow
+  tl.from('#s1-right-block', { x: 120, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.4);
+  // Divider: draw across
+  tl.from('#s1-divider', { scaleY: 0, duration: 0.8, ease: 'power2.inOut', transformOrigin: 'top' }, 0.6);
+  // Center label: type on
+  tl.from('#s1-center-label', { opacity: 0, duration: 0.4 }, 1.2);
+  // Ghost text: fade in
+  tl.from('#s1-ghost', { opacity: 0, duration: 1 }, 1.5);
+  // Glow ambient breathe
+  gsap.to('#s1-glow-right', {
+    scale: 1.08, duration: 2.5, repeat: -1, yoyo: true, ease: 'sine.inOut'
+  });
+  tl.from('#s1-glow-right', { opacity: 0, duration: 1 }, 0.4);
+
+  window.__timelines['s1'] = tl;
+})();
+
+// ─── SCENE 2 ───
+(function() {
+  const tl = gsap.timeline({ paused: true });
+
+  // Title + subtitle
+  tl.from('#s2-title', { y: -30, opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.1);
+  tl.from('#s2-subtitle', { y: -20, opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.3);
+
+  // Lanes staggered drop
+  tl.from('#s2-lane-user', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.5);
+  tl.from('#s2-connector-1', { opacity: 0, duration: 0.3 }, 0.8);
+  tl.from('#s2-lane-gateway', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.9);
+  tl.from('#s2-connector-2', { opacity: 0, duration: 0.3 }, 1.2);
+  tl.from('#s2-lane-openclaw', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.out' }, 1.3);
+  tl.from('#s2-connector-3', { opacity: 0, duration: 0.3 }, 1.6);
+  tl.from('#s2-lane-dproxy', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.out' }, 1.7);
+  tl.from('#s2-connector-4', { opacity: 0, duration: 0.3 }, 2.0);
+  tl.from('#s2-lane-legacy', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.out' }, 2.1);
+
+  // Grid fade in
+  tl.from('#s2-grid', { opacity: 0, duration: 1 }, 0.1);
+
+  // Center glow breathe
+  gsap.to('#s2-center-glow', {
+    scale: 1.1, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut'
+  });
+
+  window.__timelines['s2'] = tl;
+})();
+
+// ─── SCENE 3 ───
+(function() {
+  const tl = gsap.timeline({ paused: true });
+
+  tl.from('#s3-title', { y: -40, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
+  tl.from('#s3-subtitle', { y: -20, opacity: 0, duration: 0.4, ease: 'power2.out' }, 0.4);
+
+  // Spine draw
+  tl.from('#s3-spine', { scaleX: 0, duration: 1.2, ease: 'power2.inOut', transformOrigin: 'left' }, 0.6);
+
+  // Pillars cascade in with stagger
+  const pillars = ['#s3-p1', '#s3-p2', '#s3-p3', '#s3-p4', '#s3-p5'];
+  pillars.forEach(function(id, i) {
+    tl.from(id, { y: 100, opacity: 0, duration: 0.6, ease: 'back.out(1.4)' }, 0.8 + i * 0.35);
+  });
+
+  // Ghost
+  tl.from('#s3-ghost', { opacity: 0, duration: 1.5 }, 1.0);
+
+  window.__timelines['s3'] = tl;
+})();
+
+// ─── SCENE 4 ───
+(function() {
+  const tl = gsap.timeline({ paused: true });
+
+  tl.from('#s4-title', { y: -30, opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.1);
+  tl.from('#s4-card-left', { x: -80, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.3);
+  tl.from('#s4-card-right', { x: 80, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.5);
+  tl.from('.s4-flow-row', { y: 20, opacity: 0, stagger: 0.2, duration: 0.5, ease: 'power2.out' }, 0.8);
+  tl.from('.s4-iso-layer', { x: -20, opacity: 0, stagger: 0.2, duration: 0.4, ease: 'power2.out' }, 1.0);
+
+  window.__timelines['s4'] = tl;
+})();
+
+// ─── SCENE 5 ───
+(function() {
+  const tl = gsap.timeline({ paused: true });
+
+  tl.from('#s5-title', { y: -30, opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.1);
+  tl.from('#s5-left-panel', { x: -80, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.3);
+  tl.from('#s5-right-panel', { x: 80, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.5);
+  tl.from('.s5-ring', { y: 20, opacity: 0, stagger: 0.25, duration: 0.5, ease: 'power2.out' }, 0.8);
+
+  window.__timelines['s5'] = tl;
+})();
+
+// ─── SCENE 6 ───
+(function() {
+  const tl = gsap.timeline({ paused: true });
+
+  tl.from('#s6-statement', { y: 40, opacity: 0, duration: 0.7, ease: 'power3.out' }, 0.2);
+  tl.from('#s6-sub', { y: 20, opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.6);
+  tl.from('#s6-pillars-row', { y: 30, opacity: 0, duration: 0.5, ease: 'power2.out' }, 0.9);
+  tl.from('#s6-source', { opacity: 0, duration: 0.4 }, 1.3);
+
+  // Bottom glow pulse
+  gsap.to('#s6-bottom-glow', {
+    scale: 1.15, opacity: 0.8, duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut'
+  });
+
+  window.__timelines['s6'] = tl;
+})();
+
+// ─── ROOT TIMELINE ───
+(function() {
+  const root = gsap.timeline({ paused: true });
+  const scenes = ['s1', 's2', 's3', 's4', 's5', 's6'];
+  scenes.forEach(function(id) {
+    root.add(window.__timelines[id].play(), 0);
+  });
+  window.__timelines['root'] = root;
+})();
+</script>
+</body>
+</html>
