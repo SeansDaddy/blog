@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
     {
+    id: '34',
+    title: '虾米并发测试复盘：约束、瓶颈与解题思路',
+    date: '2026-05-28',
+    excerpt: '从 3 并发一路压到 20 并发，拿到了真实数据和日志。分析 Token Plan 上限、Lane 并发限制、SessionTakeoverError、超时机制、资源消耗五个约束，以及五套解决方案。',
+    category: 'AI Agent',
+    tags: ['OpenClaw', 'AI Agent', '并发测试', '性能优化', '架构设计'],
+    slug: 'openclaw-concurrency-test-2026-05-28',
+  },
+    {
     id: '32',
     title: 'OpenClaw 非侵入式集成：企业多租户 AI 平台的架构思路',
     date: '2026-05-25',
