@@ -68,7 +68,7 @@ lane wait exceeded: lane=main waitedMs=6408 queueAhead=0 activeAhead=4 activeNow
 
 ---
 
-### 问题三：SessionTakeoverError（session 文件并发读写冲突）
+### 问题三：SessionTakeoverError（Gateway 内部 Session 生命周期问题）
 
 这是今天遇到最明确的错误：
 
@@ -76,12 +76,20 @@ lane wait exceeded: lane=main waitedMs=6408 queueAhead=0 activeAhead=4 activeNow
 EmbeddedAttemptSessionTakeoverError: session file changed while embedded prompt lock was released
 ```
 
-当一个请求正在写 session 文件（比如写入 tool 执行结果或 assistant 回复），另一个请求也来读写同一个 session 文件——触发锁冲突，保护性中断。
+我最初的分析认为这是"多个请求操作同一个 session 文件"导致的锁冲突——但这是错的。实际情况是：**每个 API 调用本身就在独立的 session 上下文中，Gateway 会自动为每个请求分配独立的 session**，不存在多请求共享同一个 session 文件的问题。
+
+那这个错误是怎么发生的？从日志的上下文来看：
+
+```
+EmbeddedAttemptSessionTakeoverError: session file changed while embedded prompt lock was released
+```
+
+问题出在 Gateway 内部 session 文件的**生命周期管理**本身：当一个请求的 embedded prompt 锁释放后、但在正式 commit session 文件之前，如果另一个请求的操作改变了这个文件（可能是 Gateway 内部的 session 预写、锁重新获取、或者 session 文件的 GC 合并），就会触发这个保护性中断。
 
 **发生规律：**
-- 发生在高并发（≥4）时
-- `lane=main` 和 `lane=session:agent:main:openai:xxx` 同时操作同一个 session 文件
-- 错误发生时，两个 lane 的任务同时失败
+- 发生在高并发（≥4）时，与请求密度相关
+- 不是多个请求争用同一个 session，而是 session 文件在其生命周期内的状态突变
+- 错误发生时，该请求被主动中断，返回 `None`
 
 **影响：** 导致部分请求中途断连，返回 `None`（不是 timeout，不是被拒绝，是更早就断了）。
 
@@ -120,8 +128,8 @@ API 层（Token Plan）
     ↓ 套餐并发限制（触发 2062）
 Gateway 层（Lane 并发上限）
     ↓ activeAhead ≈ 6（触发 lane wait）
-Session 层（文件锁冲突）
-    ↓ 多请求操作同一 session 文件（触发 Takeover）
+Session 层（生命周期状态突变）
+    ↓ embedded prompt 锁释放后文件状态变化（触发 Takeover）
 请求层（超时设置）
     ↓ 脚本 timeout 和 Lane 内部超时
 资源层（CPU/内存/磁盘）
@@ -159,13 +167,11 @@ Updated agents.defaults.maxConcurrent. Restart the gateway to apply.
 
 ---
 
-### 方案三：每个请求使用独立 session
+### 方案三：降低 session 文件状态突变概率
 
-**解决层级：** Session 层（文件锁冲突）
+**解决层级：** Session 层（生命周期状态突变）
 
-`SessionTakeoverError` 的根因是多个请求操作同一个 session 文件。如果能让每个请求使用独立的 session ID，锁冲突就会消失。
-
-**实现方式：** 在 API 请求的 messages 开头加上一个 unique session tag，或者在调用层面维护一个 session 池，让并发请求分散到不同 session。
+`SessionTakeoverError` 的根因不是多请求争用同一个 session（每个请求本身已隔离），而是高并发下 session 文件在其生命周期内发生状态突变。可以通过减少并发密度（错峰执行）来降低触发概率。
 
 ---
 
@@ -193,7 +199,7 @@ Updated agents.defaults.maxConcurrent. Restart the gateway to apply.
 | 10 并发 | ✅ 良好，效率 6.35x | 可直接用于生产 |
 | 20 并发 | ⚠️ 60% 成功率，有改进空间 | 需优化后使用 |
 
-今天验证了一件事：**OpenClaw Gateway 在合理并发下（≤10）是完全可以稳定工作的**。超过 10 之后，主要问题是 Lane 上限和 session 文件锁。要继续往上扩，核心路径是：调高 `maxConcurrent` → 配合 session 隔离 → 配合更宽松的 timeout。
+今天验证了一件事：**OpenClaw Gateway 在合理并发下（≤10）是完全可以稳定工作的**。超过 10 之后，主要问题是 Lane 上限和 session 文件生命周期状态突变。要继续往上扩，核心路径是：调高 `maxConcurrent` → 降低并发密度（减少状态突变） → 配合更宽松的 timeout。
 
 下一步可以实测调高 `maxConcurrent` 后的 20 并发表现。
 
