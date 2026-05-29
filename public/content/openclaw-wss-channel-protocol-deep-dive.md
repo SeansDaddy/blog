@@ -281,31 +281,91 @@ node-host, test, fingerprint, openclaw-probe
 
 ---
 
-## 五、并发扩展思路
+## 五、并发测试：广播机制发现
 
-拿到单连接的正确姿势后，并发扩展其实很直接：
+拿到单连接的正确姿势后，满心欢喜跑 4并发，结果让人一愣：4个连接全部收到相同的响应，4个连接都显示 `2`。
+
+### 测试现象
+
+同时用 4 个独立连接发送 4 个完全不同的问题：
 
 ```python
-import concurrent.futures
-
-def run_session(question):
-    ws = websocket.create_connection(GATEWAY_URL)
-    connect(ws)
-    answer = ask(ws, question)
-    ws.close()
-    return answer
-
-with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
-    futures = [ex.submit(run_session, q) for q in questions]
-    for f in concurrent.futures.as_completed(futures):
-        print(f.result())
+# 同时发
+session("用3个字介绍自己", "T1")
+session("1+1等于几？简洁", "T2")
+session("今天星期几", "T3")
+session("你是谁？", "T4")
 ```
 
-每个 session 独立创建 WebSocket 连接，独立 sessionKey，独立 reader 线程，之间互不干扰。
+结果：4 个连接全部显示 `2`——这是一个问题，因为每个连接问的都不一样。
+
+### 根因定位
+
+设计一系列分层验证实验：
+
+**实验 1：单连接顺序发**
+
+单连接顺序发送 4 个问题，4/4 全部收到正确响应 ✅
+
+**实验 2：同时发 4 个不同问题**
+
+4 个连接同时发，收到相同的响应（全是最后发出的那个问题的响应）❌
+
+**实验 3：同时发 4 个相同问题**
+
+4 个连接同时发，收到相同响应——但如果广播，应该收到所有 AI 响应的拼接才对，实际只有一条 ✅
+
+**实验 4：3 个相同 + 1 个独特问题**
+
+3 个连接问 `1+1=?`，1 个连接问 `今天西安天气`，4 个连接全部收到 `22`（`1+1=?` 的响应）✅
+
+### 结论：Gateway 广播机制
+
+```
+同一 Token 的多个 WSS 连接
+         │
+         ↓
+  Gateway 识别为同一个"用户会话"
+         │
+         ↓
+  AI 每次响应 → 广播给所有连接
+         │
+         ↓
+  4 个连接中只有 1 个幸运儿能 recv 到响应
+```
+
+**每个连接的 `res` 响应是独立的**（含正确的 `runId`），但 **AI 响应的事件帧会广播给所有连接**，且只有最新一条 AI 响应被保留（老的被新的覆盖）。
+
+### 单连接顺序 vs 多 Token 并发
+
+基于广播机制，并发扩展有两条路径：
+
+**路径 A：单连接顺序**（同 Token，完全串行）
+
+```python
+# 一个连接，顺序发请求，不存在广播竞争
+for q in questions:
+    result = ask(ws, q)  # 等上一个回答收到再发下一个
+```
+
+实测单连接顺序 4 问 → 4/4 全部正确。
+
+**路径 B：多 Token 独立广播域**（真正并行）
+
+每个 Token 对应独立的广播域，4 个 Token → 4 个独立连接 → 各自收到自己的响应。
+
+```python
+TOKENS = ["token1", "token2", "token3", "token4"]
+
+def run_session(question, token):
+    ws = websocket.create_connection(GATEWAY_URL)
+    connect(ws, token=token)  # 每个连接用不同 token
+    return ask(ws, question)
+```
 
 ---
 
-## 附：WSS 消息总动员
+## 六、附：WSS 消息总动员
 
 **连接请求：**
 ```json
