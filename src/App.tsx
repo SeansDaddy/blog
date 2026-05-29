@@ -22,6 +22,15 @@ interface Post {
 
 const POSTS: Post[] = [
     {
+    id: '35',
+    title: 'OpenClaw WSS 通道协议：从握手到流式 AI 对话',
+    date: '2026-05-29',
+    excerpt: '从源码追踪到 Python 原生实现，完整还原 OpenClaw Gateway WSS 协议——ws vs wss、client.id 权限陷阱、send vs chat.send、事件流格式，并提供可独立运行的 Demo。',
+    category: 'AI Agent',
+    tags: ['OpenClaw', 'WebSocket', '协议解析', 'AI Agent', 'Python'],
+    slug: 'openclaw-wss-channel-protocol-deep-dive',
+  },
+    {
     id: '34',
     title: '虾米并发测试复盘：约束、瓶颈与解题思路',
     date: '2026-05-28',
