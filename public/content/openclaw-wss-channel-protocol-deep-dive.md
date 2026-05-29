@@ -472,18 +472,37 @@ req = {
 
 ### 4 并发连接测试结果
 
-用设备身份认证跑 4 并发，每个连接使用同一个设备 ID + 不同 nonce 签名：
+用设备身份认证跑 4 并发，每个连接使用同一个设备 ID + 不同 nonce 签名，同时各问不同问题：
 
-| 连接 | connId | scopes |
-|------|--------|--------|
-| 0 | `efa21d1e-46a0-49b7-ab18-8d53b4ff9f37` | `operator.admin/read/write` ✅ |
-| 1 | `beefe064-5b58-4f89-a390-3ad3023d5c60` | `operator.admin/read/write` ✅ |
-| 2 | `066ab68e-a324-45aa-b95f-1f2974fe34f0` | `operator.admin/read/write` ✅ |
-| 3 | `9f7c7ea8-8d90-4857-9136-725ba13cae9c` | `operator.admin/read/write` ✅ |
+| 连接 | 问题 | connId | scopes |
+|------|------|--------|--------|
+| 0 | 回复一个单词：是 | `780e2ef8-...` | ✅ admin/read/write |
+| 1 | 回复一个单词：否 | `11d604ab-...` | ✅ admin/read/write |
+| 2 | 回复一个单词：苹果 | `8198f8ee-...` | ✅ admin/read/write |
+| 3 | 回复一个单词：香蕉 | `5fb1c5b0-...` | ✅ admin/read/write |
 
 - **独立 connId：4/4**（每个连接唯一）
 - **chat.send 全部成功：4/4**
 - **scopes 全部正确：4/4**
+
+### 并发串台测试
+
+用 4 个并发连接同时各发一个不同问题，验证是否存在广播串台：
+
+```
+连接0 → "是"   连接1 → "否"   连接2 → "苹果"   连接3 → "香蕉"
+```
+
+**结果：4 个连接全部收到相同的回答 "否"**（最后一个到达的响应覆盖了前面的）。
+
+**根因：广播域按 Token 划分，不是按连接或设备划分。** AI 响应事件通过 Gateway 广播给所有持有同一 Token 的 WSS 连接，事件本身不携带请求 ID（`event.id` 始终为 `None`），导致客户端无法区分来源，只能被覆盖。
+
+**结论：**
+
+- 设备签名认证 ✅ 解决了 scopes 清空问题
+- 独立 connId ✅ 每个连接唯一
+- 并发无串台 ❌ 同一 Token 下的连接共享广播域，AI 响应会相互覆盖
+- **如果要真正并发无串台，需要每个连接使用不同的 Token**，对应各自独立的广播域
 
 关键发现：**设备签名认证**绕过了 `shouldClearUnboundScopesForMissingDeviceIdentity()` 的 scopes 清除逻辑，让每个连接都能以完整权限身份运行。
 
