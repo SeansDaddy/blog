@@ -365,7 +365,131 @@ def run_session(question, token):
 
 ---
 
-## 六、附：WSS 消息总动员
+## 七、设备身份认证：突破 scopes 清空的最后一步
+
+### 问题重现
+
+用原始 token 连接，`scopes` 一开始是空的：
+
+```python
+# 不带设备信息 → scopes 被清空
+{"type":"req","id":"1","method":"connect","params":{
+    "auth": {"token": "fee120..."},
+    "scopes": ["operator.admin", "operator.read", "operator.write"]
+}}
+# → {"ok": true, "scopes": []}  ❌
+```
+
+即使显式传入 `scopes` 参数，Gateway 的 `shouldClearUnboundScopesForMissingDeviceIdentity()` 仍然会把它清空。
+
+### 根因：设备身份缺失
+
+源码 `handshake-auth-helpers.ts` 揭示了判断链：
+
+```typescript
+function shouldClearUnboundScopesForMissingDeviceIdentity(params) {
+  if (params.authMethod === "token") {
+    // 只有 gateway-client + mode=backend 在本地时 bypass
+    // 其余所有情况：auth token 没有对应设备记录 → scopes 全部清除
+    return !shouldSkipLocalBackendSelfPairing(params);
+  }
+}
+```
+
+解决路径：**在连接时提供设备身份（Device Identity）**，让 Gateway 认定这是"已知设备发起的请求"，从而保留 scopes。
+
+### 设备配对流程（完整 4 步）
+
+#### Step 1：生成 ECDSA P-256 密钥对
+
+```python
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.backends import default_backend
+
+pk = ec.generate_private_key(ec.SECP256R1(), default_backend())
+priv_pem = pk.private_bytes(
+    serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+    serialization.NoEncryption()
+).decode()
+pub_pem = pk.public_key().public_bytes(
+    serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
+).decode()
+```
+
+#### Step 2：连接时传递设备签名
+
+连接时在 `params.device` 里附上公钥和签名：
+
+```python
+def build_payload_v3(device_id, client_id, client_mode, role, scopes,
+                      signed_at_ms, token, nonce, platform, device_family):
+    return "|".join([
+        "v3", device_id, client_id, client_mode, role, ",".join(scopes),
+        str(signed_at_ms), token, nonce,
+        platform.lower(), device_family.lower()
+    ])
+
+# 签名内容 = "v3|deviceId|clientId|clientMode|role|scopes|signedAtMs|token|nonce|platform|deviceFamily"
+payload_v3 = build_payload_v3(device_id, "openclaw-tui", "backend", "operator",
+                              scopes, signed_at_ms, token, connect_nonce, "linux", "")
+signature = b64url_encode(pk.sign(
+    payload_v3.encode("utf8"), ec.ECDSA(hashes.SHA256())
+))
+```
+
+#### Step 3：附在 connect 请求里
+
+```python
+req = {
+    "type": "req", "id": "1", "method": "connect",
+    "params": {
+        "minProtocol": 3, "maxProtocol": 4,
+        "client": {"id": "openclaw-tui", "version": "1.0.0",
+                   "platform": "linux", "mode": "backend"},
+        "role": "operator",
+        "auth": {"token": GATEWAY_TOKEN},
+        "device": {                          # ← 设备身份是关键
+            "id": device_id,
+            "publicKey": pub_b64url,         # ECDSA P-256 公钥（raw, base64url）
+            "signature": signature,          # payload_v3 的 ECDSA 签名
+            "signedAt": signed_at_ms,
+            "nonce": connect_nonce           # 必须和 connect challenge nonce 一致
+        },
+        "scopes": ["operator.admin", "operator.read", "operator.write"]
+    }
+}
+```
+
+#### Step 4：验证 scopes 保留
+
+带设备签名连接后，`auth.scopes` 终于显示正确：
+
+```python
+# → {"ok": true, "auth": {"role": "operator", "scopes": [
+#     "operator.admin", "operator.read", "operator.write"
+#   ]}}
+```
+
+### 4 并发连接测试结果
+
+用设备身份认证跑 4 并发，每个连接使用同一个设备 ID + 不同 nonce 签名：
+
+| 连接 | connId | scopes |
+|------|--------|--------|
+| 0 | `efa21d1e-46a0-49b7-ab18-8d53b4ff9f37` | `operator.admin/read/write` ✅ |
+| 1 | `beefe064-5b58-4f89-a390-3ad3023d5c60` | `operator.admin/read/write` ✅ |
+| 2 | `066ab68e-a324-45aa-b95f-1f2974fe34f0` | `operator.admin/read/write` ✅ |
+| 3 | `9f7c7ea8-8d90-4857-9136-725ba13cae9c` | `operator.admin/read/write` ✅ |
+
+- **独立 connId：4/4**（每个连接唯一）
+- **chat.send 全部成功：4/4**
+- **scopes 全部正确：4/4**
+
+关键发现：**设备签名认证**绕过了 `shouldClearUnboundScopesForMissingDeviceIdentity()` 的 scopes 清除逻辑，让每个连接都能以完整权限身份运行。
+
+---
+
+## 八、附：WSS 消息总动员
 
 **连接请求：**
 ```json
